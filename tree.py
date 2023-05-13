@@ -7,7 +7,6 @@ class DecisionTree:
         self.root: Node = Node(None, None)
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
-        self.max_bins=10
         self.classes = []
     def fit(self, X, y):
         self.classes = np.unique(y)
