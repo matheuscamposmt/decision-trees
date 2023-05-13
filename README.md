@@ -1,4 +1,4 @@
-# Decision Tree Implementation from Scratch using Python and NumPy
+# Decision Tree from scratch using Python and NumPy
 ![Decision Tree Illustration](https://www.xoriant.com/cdn/ff/weqpbrtpXGjLpVQ_X-gWqsFlvjAxpv5Wv3xNW0A4vuQ/1602007254/public/2020-10/a-decisionTreesforClassification-AMachineLearningAlgorithm.jpg)
 
 This is an implementation of the Decision Tree algorithm from scratch using the CART (Classification and Regression Trees) algorithm, which is a widely used algorithm for building decision trees. This implementation is written in Python and uses NumPy for numerical computations.
