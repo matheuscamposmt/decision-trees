@@ -1,4 +1,3 @@
-import pandas as pd
 from tree import DecisionTree
 from sklearn.datasets import load_iris
 from sklearn import tree
