@@ -1,74 +1,113 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-import plotly.graph_objs as go
-from sklearn.datasets import load_iris
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.tree import plot_tree
+from dash import html, dcc, Input, Output, State
 import numpy as np
+from node import Node, LeafNode
+from tree import DecisionTree
+from sklearn.datasets import load_iris
 
-# Load the Iris dataset
-iris = load_iris()
-
-# Train a decision tree model on the Iris dataset
-model = DecisionTreeClassifier(random_state=0)
-model.fit(iris.data, iris.target)
-
-# Create the Dash application
 app = dash.Dash(__name__)
+# Create a dropdown menu to select the dataset to use.
+dataset_options = [
+    {'label': "Iris", 'value': "iris"},
+    {'label': "Wine", 'value': "wine"},
+    {'label': "Breast Cancer" ,'value': "breast_cancer"}
+]
 
-# Define the layout of the Dash application
-app.layout = html.Div(children=[
-    dcc.Graph(id='tree-graph'),
-    html.Div(id='tree-data')
-])
-
-# Define a callback that updates the decision tree visualization
-@app.callback(
-    Output('tree-graph', 'figure'),
-    Input('tree-data', 'children')
+dataset_dropdown = dcc.Dropdown(
+    id="dataset-dropdown",
+    options=dataset_options,
+    value="iris",
 )
-def update_tree_graph(children):
-    # Parse the tree data from the callback input
-    if children:
-        tree_data = np.array(json.loads(children))
-    else:
-        tree_data = None
 
-    # Create a Plotly figure that displays the decision tree
-    fig = go.Figure()
-    if tree_data is not None:
-        fig = plot_tree(tree_data, feature_names=iris.feature_names, class_names=iris.target_names, filled=True)
-    return fig
-
-# Define a callback that updates the tree data
-@app.callback(
-    Output('tree-data', 'children'),
-    Input('tree-graph', 'clickData')
+# Create a text input to enter the maximum depth of the tree.
+max_depth_input = dcc.Input(
+    id="max-depth-input",
+    type="number",
+    value=None,
 )
-def update_tree_data(clickData):
-    # Retrieve the node that was clicked by the user
-    if clickData is not None and 'text' in clickData['points'][0]:
-        node_text = clickData['points'][0]['text']
-        node_id = int(node_text.split(' ')[1])
-        children_left = np.array(model.tree_.children_left)
-        children_right = np.array(model.tree_.children_right)
-        feature = np.array(model.tree_.feature)
-        threshold = np.array(model.tree_.threshold)
-        value = np.array(model.tree_.value)
-        node_data = {
-            'node_id': node_id,
-            'feature': feature[node_id],
-            'threshold': threshold[node_id],
-            'left_child': children_left[node_id],
-            'right_child': children_right[node_id],
-            'value': value[node_id].tolist()
-        }
-        return json.dumps(node_data)
-    else:
-        return json.dumps(None)
 
-# Run the Dash application
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# Create a text input to enter the minimum number of samples required to create a leaf node.
+min_samples_leaf_input = dcc.Input(
+    id="min-samples-leaf-input",
+    type="number",
+    value=None,
+)
+
+# Create a button to fit the tree to the dataset.
+fit_button = html.Button(
+    "Fit",
+    id="fit-button",
+    n_clicks=0
+)
+# Create a table to display the tree structure.
+tree_table = dash.dash_table.DataTable(
+    id="tree-table",
+    columns=[
+        {"name": "Feature", "id": "feature"},
+        {"name": "Threshold", "id": "threshold"},
+        {"name": "Left Child", "id": "left_child"},
+        {"name": "Right Child", "id": "right_child"},
+    ],
+    data=[],
+)
+
+# Create a layout for the app.
+app.layout = html.Div(
+    [
+        html.H1("Decision Tree Visualization"),
+        html.Div(
+            [
+                dataset_dropdown,
+                max_depth_input,
+                min_samples_leaf_input,
+                fit_button,
+                tree_table,
+            ],
+            style={"width": "50%"},
+        ),
+    ]
+)
+
+# Create a callback to fit the tree to the dataset when the fit button is clicked.
+@app.callback(
+    Output("tree-table", "data"),
+    [Input("fit-button", "n_clicks")],
+    [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-leaf-input", "value")],
+)
+def fit_tree(n_clicks, dataset_name, max_depth, min_samples_leaf):
+    if n_clicks == 0:
+        return []
+    data = None
+
+    # Load the dataset.
+    if dataset_name.lower() == "iris":
+        data=load_iris()
+
+    else:
+        np.loadtxt("data/" + dataset_name + ".csv", delimiter=",")
+
+    X, y = data.data, data.target.reshape(-1 ,1)
+    # Create a decision tree.
+    tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf)
+    tree.fit(X, y)
+
+    # Get the tree structure.
+    tree_structure = tree.get_tree_structure()
+    # Convert the tree structure to a list of dictionaries.
+    tree_data = []
+    for node in tree_structure:
+        tree_data.append(
+            {
+                "Feature": node.feature_idx,
+                "Threshold": node.threshold,
+                "Left Child": node.left.id if node.left is not None else None,
+                "Right Child": node.right.id if node.right is not None else None,
+            }
+        )
+
+    print(tree_data)
+
+    return tree_data
+
+# Run the app.
+app.run_server(debug=True)

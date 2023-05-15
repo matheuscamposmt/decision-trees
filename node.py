@@ -4,7 +4,10 @@ from utils import proportion
 
 
 class Node:
+    count=0
     def __init__(self, left, right, feature_idx=None, threshold=None):
+        self.id=Node.count
+        Node.count += 1
         self.left: Node = left
         self.right: Node = right
         self.feature_idx = feature_idx

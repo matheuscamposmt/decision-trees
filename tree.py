@@ -90,3 +90,22 @@ class DecisionTree:
         right_node = self._grow(right_data, features_idx, depth=depth+1)
 
         return Node(left_node, right_node, selected_feature, min_feature_threshold)
+    
+    def _traverse(self, node: Node):
+        if node is None:
+            return []
+
+        # Process the current node
+        # ... do something with the node ...
+
+        # Recursively traverse the left and right subtrees
+        left_nodes = self._traverse(node.left)
+        right_nodes = self._traverse(node.right)
+
+        # Combine the nodes from the current node, left subtree, and right subtree
+        nodes = [node] + left_nodes + right_nodes
+
+        return nodes
+    
+    def get_tree_structure(self):
+        return self._traverse(self.root)
