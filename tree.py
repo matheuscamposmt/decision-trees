@@ -50,8 +50,12 @@ class DecisionTree:
             feature_data = data[:, feature_idx]
             labels = data[:, -1]
 
+            unique_data = np.sort(np.unique(feature_data))
+            if len(unique_data) < 2:
+                print(feature_data)
+                raise ValueError(f"Array too small: {unique_data}")
             # generate the thresholds
-            thresholds = mean_adjacent(np.sort(np.unique(feature_data)), window_size=2)
+            thresholds = mean_adjacent(np.sort(feature_data), window_size=2)
             
             # initiate the min cost and min thresh variables
             min_cost, min_thresh = np.inf, 0

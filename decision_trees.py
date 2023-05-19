@@ -1,9 +1,11 @@
 import dash
 from dash import html, dcc, Input, Output, State
+import plotly.graph_objects as go
 import numpy as np
 from node import Node, LeafNode
 from tree import DecisionTree
 from sklearn.datasets import load_iris
+from typing import List
 
 app = dash.Dash(__name__)
 # Create a dropdown menu to select the dataset to use.
@@ -51,6 +53,8 @@ tree_table = dash.dash_table.DataTable(
     data=[],
 )
 
+graph = dcc.Graph(id='tree-graph')
+
 # Create a layout for the app.
 app.layout = html.Div(
     [
@@ -61,53 +65,124 @@ app.layout = html.Div(
                 max_depth_input,
                 min_samples_leaf_input,
                 fit_button,
-                tree_table,
+                graph
             ],
             style={"width": "50%"},
         ),
     ]
 )
 
-# Create a callback to fit the tree to the dataset when the fit button is clicked.
-@app.callback(
-    Output("tree-table", "data"),
-    [Input("fit-button", "n_clicks")],
-    [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-leaf-input", "value")],
-)
-def fit_tree(n_clicks, dataset_name, max_depth, min_samples_leaf):
-    if n_clicks == 0:
-        return []
+def fit_tree(dataset_name: str, max_depth: int, min_samples_leaf: int) -> List[Node]:
     data = None
 
     # Load the dataset.
     if dataset_name.lower() == "iris":
-        data=load_iris()
+        data = load_iris()
 
     else:
-        np.loadtxt("data/" + dataset_name + ".csv", delimiter=",")
+        data = np.loadtxt("data/" + dataset_name + ".csv", delimiter=",")
 
     X, y = data.data, data.target.reshape(-1 ,1)
     # Create a decision tree.
     tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf)
     tree.fit(X, y)
 
-    # Get the tree structure.
-    tree_structure = tree.get_tree_structure()
-    # Convert the tree structure to a list of dictionaries.
-    tree_data = []
-    for node in tree_structure:
-        tree_data.append(
-            {
-                "Feature": node.feature_idx,
-                "Threshold": node.threshold,
-                "Left Child": node.left.id if node.left is not None else None,
-                "Right Child": node.right.id if node.right is not None else None,
-            }
+    return tree.root
+
+def update_graph(root, feature_names=None) -> go.Figure:
+    fig = go.Figure()
+
+    frames = []
+    def traverse(node, x, y):
+        if node is None:
+            return
+        scatter_trace = go.Scatter(
+            x=[x], y=[y],
+            mode='markers+text',
+            marker=dict(size=25, color='blue'),
+            text=[f"Threshold: {node.threshold} \n Feature:{feature_names[node.feature_idx] if feature_names else node.feature_idx}"],
+            textposition="middle center",
+            hovertemplate="%{text}<extra></extra>",
+            textfont=dict(color='blue') 
         )
+        # Add current node to the figure
+        #fig.add_trace(scatter_trace)
 
-    print(tree_data)
+        # Determine the positions of child nodes
+        if node.has_left_child():
+            left_x = x - 5
+            left_y = y - 5
+            # Add a line connecting the current node and the left child
+            line_trace = go.Scatter(
+                x=[x, left_x],
+                y=[y, left_y],
+                mode='lines',
+                line=dict(color='black')
+            )
+            #fig.add_trace(line_trace)
 
-    return tree_data
+            frames.append(go.Frame(data=[scatter_trace, line_trace]))
+            traverse(node.left, left_x, left_y)
+            
+
+        if node.has_right_child():
+            right_x = x + 5
+            right_y = y - 5
+            # Add a line connecting the current node and the right child
+            line_trace = go.Scatter(
+                x=[x, right_x],
+                y=[y, right_y],
+                mode='lines',
+                line=dict(color='green')
+            )
+            #fig.add_trace(line_trace)
+
+            frames.append(go.Frame(data=[scatter_trace, line_trace]))
+            traverse(node.right, right_x, right_y)
+
+
+
+    # Starting position for the root node
+    root_x = 100
+    root_y = 200
+
+    # Traverse the binary tree and update the figure
+    traverse(root, root_x, root_y)
+
+    fig.update_layout(
+        showlegend=False,
+        height=800,
+        width=1000,
+        updatemenus=[dict(type='buttons', showactive=False,
+                          buttons=[dict(label='Play',
+                                        method='animate',
+                                        args=[None, {'frame': {'duration': 1000, 'redraw': True}, 'fromcurrent': True, 'transition': {'duration': 500}}]
+                                        )]
+                          )]
+    )
+
+    # Add frames to the figure
+    fig.frames = frames
+
+    return fig
+
+# Create a callback to fit the tree to the dataset when the fit button is clicked.
+@app.callback(
+    Output("tree-graph", "figure"),
+    [Input("fit-button", "n_clicks")],
+    [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-leaf-input", "value")],
+)
+def update_figure(n_clicks: int, dataset_name: str, max_depth: int, min_samples_leaf: int) -> go.Figure:
+    if n_clicks == 0:
+        fig = go.Figure([])
+        fig.update_layout(
+            showlegend=False,
+            height=800,
+            width=1000)
+        return fig
+    
+    tree_structure = fit_tree(dataset_name, max_depth, min_samples_leaf)
+    return update_graph(tree_structure)
 
 # Run the app.
 app.run_server(debug=True)
