@@ -12,6 +12,7 @@ dtree.fit(X, y)
 
 mypred= dtree.predict(X)
 
+
 clf = tree.DecisionTreeClassifier()
 clf = clf.fit(X, y)
 

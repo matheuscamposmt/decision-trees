@@ -5,11 +5,8 @@ from utils import proportion
 
 class Node:
     count=0
-    x, y = 20, 200
     def __init__(self, left, right, feature_idx=None, threshold=None):
         self.id=Node.count
-        self.x = Node.x
-        self.y = Node.y
         Node.count += 1
 
         self.left: Node = left

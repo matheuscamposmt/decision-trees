@@ -1,13 +1,16 @@
 from utils import mean_adjacent, cost_function
 import numpy as np
 from node import Node, LeafNode
+from itertools import count
 
 class DecisionTree:
     def __init__(self, max_depth=None, min_samples_leaf=4):
+        Node.count = 0
         self.root: Node = Node(None, None)
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.classes = []
+    
     def fit(self, X, y):
         self.classes = np.unique(y)
         self.root = self._grow(np.concatenate((X, y), axis=1), np.arange(X.shape[-1]))
