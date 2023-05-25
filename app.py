@@ -2,12 +2,14 @@ import dash
 from dash import html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-import math
+import igraph
 from node import Node, LeafNode
 from tree import DecisionTree
 from sklearn.datasets import load_iris
 from typing import List
 import pickle
+
+
 
 app = dash.Dash(__name__)
 # Create a dropdown menu to select the dataset to use.
@@ -121,7 +123,6 @@ def update_tree(n_clicks, tree_filename: str):
     
         return count
     
-    tree = None
     with open(tree_filename, 'rb') as tree_file:
         tree = pickle.load(tree_file)
 
@@ -130,40 +131,52 @@ def update_tree(n_clicks, tree_filename: str):
 
     # Traversal algorithm to generate tree nodes in a list
     nodes = []
-    queue = [(tree, 0, 20, 0)]
+    queue = [(tree, 0, 0)]
 
     node_i = 0
     while queue:
-        node, level, x, node_id = queue.pop(0)
-        nodes.append((node_id, node.feature_idx, level, x))
+        node, level, node_id = queue.pop(0)
+        nodes.append((node_id, node.feature_idx, level))
         
         if node.left:
             left_id = node_i + 1  # Assign a unique ID to the left child
             node_i += 1
-            queue.append((node.left, level + 1, x - 15*(level+1), left_id))
+            queue.append((node.left, level + 1, left_id))
             adj_list[node_id].append(left_id)  # Add a connection from the current node to the left child
         
         if node.right:
             right_id = node_i + 1  # Assign a unique ID to the right child
             node_i += 1
-            queue.append((node.right, level + 1, x + 15*(level+1), right_id))
+            queue.append((node.right, level + 1, right_id))
             adj_list[node_id].append(right_id)  # Add a connection from the current node to the right child
     
     # Create the tree visualization
-    node_ids=[node[0] for node in nodes]
-    labels = np.array([node[1] for node in nodes])
-    levels = np.array([node[2] for node in nodes])
-    x_s = np.array([node[3] for node in nodes])
-    
-    max_level = levels.max()
-    inverted_levels = max_level - levels
+    labels = [node[1] for node in nodes]
+    levels = [node[2] for node in nodes]
+    max_level = max(levels)
+
+    G = igraph.Graph()
+    # Add vertices to the graph
+    for vertex, _ in enumerate(adj_list):
+        G.add_vertex(vertex)
+
+    # Add edges to the graph
+    for vertex, neighbors in enumerate(adj_list):
+        for neighbor in neighbors:
+            G.add_edge(vertex, neighbor)
+
+    # Calculate the 'rt' layout based on the levels
+    layout = G.layout_reingold_tilford(mode="in", root=[0])
+    coords = layout.coords
+    x_s = [coord[0] for coord in coords]
+    y_s = [max_level - coord[1] for coord in coords]
 
     line_traces=[]
     for node_i, node_connections in enumerate(adj_list):
         for conn in node_connections:
             line_trace = go.Scatter(
                 x=[x_s[node_i], x_s[conn]],
-                y=[inverted_levels[node_i], inverted_levels[conn]],
+                y=[y_s[node_i], y_s[conn]],
                 mode='lines',
                 line=dict(color='green')
             )
@@ -172,13 +185,13 @@ def update_tree(n_clicks, tree_filename: str):
 
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
-            x=x_s, y=inverted_levels,
+            x=x_s, y=y_s,
             mode='markers+text',
-            marker=dict(size=25, color='black'),
-            text=x_s,
+            marker=dict(size=40, color='black'),
+            text=labels,
             textposition="middle center",
             hovertemplate="%{text}<extra></extra>",
-            textfont=dict(color='blue') 
+            textfont=dict(color='white', size=20) 
         )
     
     # Create the plotly figure for the tree
@@ -186,11 +199,11 @@ def update_tree(n_clicks, tree_filename: str):
     figure.update_layout(
         showlegend=False,
         xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
         width=1200,
         height=900)
     
-    return figure, True
+    return figure, False
 
 
 # Create a callback to fit the tree to the dataset when the fit button is clicked.
