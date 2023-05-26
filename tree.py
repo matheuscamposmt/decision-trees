@@ -34,7 +34,26 @@ class DecisionTree:
             print(thresh, feature_data)
             raise ValueError("")
         return (left_feature_data, left_labels), (right_feature_data, right_labels)
+    
+    def _best_split(self, feature_data: np.ndarray, labels: np.ndarray, thresholds):
+        split_costs = []
+        # for each threshold
+        for thresh in thresholds:
+            left_data, right_data = self._split_data(feature_data, labels, thresh)
 
+            left_labels = left_data[1]
+            right_labels = right_data[1]
+
+            # calculate the cost for the feature with the specific threshold
+            cost = cost_function(left_labels, right_labels, 
+                                self.classes)
+            
+            split_costs.append(cost)
+        
+        min_split_cost = min(split_costs)
+        min_thresh = thresholds[np.argmin(split_costs)]
+        
+        return min_thresh, min_split_cost 
     
     def _grow(self, data, features_idx, depth=1):
         
@@ -57,31 +76,10 @@ class DecisionTree:
             # generate the thresholds
             thresholds = mean_adjacent(np.sort(feature_data), window_size=2)
             
-            # initiate the min cost and min thresh variables
-            min_cost, min_thresh = np.inf, 0
-
-            # for each threshold
-            for thresh in thresholds:
-
-                left_data, right_data = self._split_data(feature_data, labels, thresh)
-
-                left_feature_data = left_data[0]
-                left_labels = left_data[1]
-
-                right_feature_data = right_data[0]
-                right_labels = right_data[1]
-
-                # calculate the cost for the feature with the specific threshold
-                cost = cost_function(left_labels, right_labels, 
-                                     self.classes)
-                
-                if cost < min_cost:
-                    min_cost = cost
-                    min_thresh = thresh
-
+            min_thresh, min_split_cost = self._best_split(feature_data, labels, thresholds)
             
-            if min_cost < min_cost_feature:
-                min_cost_feature = min_cost
+            if min_split_cost < min_cost_feature:
+                min_cost_feature = min_split_cost
                 min_feature_threshold = min_thresh
                 selected_feature = feature_idx
         
