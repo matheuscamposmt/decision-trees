@@ -3,7 +3,7 @@ from dash import html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import igraph
-from node import Node, LeafNode
+from node import Node
 from tree import DecisionTree
 from sklearn.datasets import load_iris
 from typing import List

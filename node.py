@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Iterable, List
+from typing import Iterable
 from utils import proportion
 
 

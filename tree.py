@@ -1,7 +1,6 @@
 from utils import mean_adjacent, cost_function
 import numpy as np
 from node import Node, LeafNode
-from itertools import count
 
 class DecisionTree:
     def __init__(self, max_depth=None, min_samples_leaf=4, feature_names=[]):
@@ -50,8 +49,9 @@ class DecisionTree:
             
             split_costs.append(cost)
         
-        min_split_cost = min(split_costs)
-        min_thresh = thresholds[np.argmin(split_costs)]
+        min_idx = np.argmin(split_costs)
+        min_split_cost = split_costs[min_idx]
+        min_thresh = thresholds[min_idx]
         
         return min_thresh, min_split_cost
     
@@ -106,6 +106,7 @@ class DecisionTree:
                     selected_feature, 
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None)
+    
     
     def _traverse(self, node: Node):
         if node is None:
