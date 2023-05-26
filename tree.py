@@ -53,21 +53,14 @@ class DecisionTree:
         min_split_cost = min(split_costs)
         min_thresh = thresholds[np.argmin(split_costs)]
         
-        return min_thresh, min_split_cost 
+        return min_thresh, min_split_cost
     
-    def _grow(self, data, features_idx, depth=1):
-        
-        # Stopping criteria
-        if self.max_depth and depth > self.max_depth:
-            return LeafNode(data)
-        if self.min_samples_leaf and (len(data) < self.min_samples_leaf):
-            return LeafNode(data)
 
-        min_cost_feature, selected_feature = np.inf, 0
-        min_feature_threshold = 0
-
+    def _best_feature(self, data, feature_idxs):
+        feature_costs = []
+        min_thresholds = []
         # for each feature in a list of the features index
-        for feature_idx in features_idx:
+        for feature_idx in feature_idxs:
 
             # get the feature data
             feature_data = data[:, feature_idx]
@@ -77,19 +70,36 @@ class DecisionTree:
             thresholds = mean_adjacent(np.sort(feature_data), window_size=2)
             
             min_thresh, min_split_cost = self._best_split(feature_data, labels, thresholds)
-            
-            if min_split_cost < min_cost_feature:
-                min_cost_feature = min_split_cost
-                min_feature_threshold = min_thresh
-                selected_feature = feature_idx
+
+            feature_costs.append(min_split_cost)
+            min_thresholds.append(min_thresh)
+        
+        min_idx = np.argmin(feature_costs)
+
+        min_feature_cost = feature_costs[min_idx]
+        min_feature_threshold = min_thresholds[min_idx]
+        selected_feature = feature_idxs[min_idx]
+
+        return selected_feature, min_feature_threshold, min_feature_cost
+        
+
+    def _grow(self, data, feature_idxs, depth=1):
+        
+        # Stopping criteria
+        if self.max_depth and depth > self.max_depth:
+            return LeafNode(data)
+        if self.min_samples_leaf and (len(data) < self.min_samples_leaf):
+            return LeafNode(data)
+
+        selected_feature, min_feature_threshold, min_feature_cost = self._best_feature(data, feature_idxs)
         
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
         right_data = data[data[:, selected_feature] >= min_feature_threshold]
 
         # Create child nodes
-        left_node = self._grow(left_data, features_idx, depth=depth+1)
-        right_node = self._grow(right_data, features_idx, depth=depth+1)
+        left_node = self._grow(left_data, feature_idxs, depth=depth+1)
+        right_node = self._grow(right_data, feature_idxs, depth=depth+1)
 
         return Node(left_node, 
                     right_node, 
