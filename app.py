@@ -88,7 +88,7 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int)
 
     X, y = data.data, data.target.reshape(-1 ,1)
     # Create a decision tree.
-    tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf)
+    tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf, feature_names=data.feature_names)
     tree.fit(X, y)
 
     root = tree.root
@@ -131,12 +131,18 @@ def update_tree(n_clicks, tree_filename: str):
 
     # Traversal algorithm to generate tree nodes in a list
     nodes = []
+    levels=[]
+    labels=[]
+    thresholds=[]
     queue = [(tree, 0, 0)]
 
     node_i = 0
     while queue:
         node, level, node_id = queue.pop(0)
-        nodes.append((node_id, node.feature_idx, level))
+        nodes.append(node)
+        levels.append(level)
+        labels.append(node.feature_name)
+        thresholds.append(node.threshold)
         
         if node.left:
             left_id = node_i + 1  # Assign a unique ID to the left child
@@ -149,10 +155,9 @@ def update_tree(n_clicks, tree_filename: str):
             node_i += 1
             queue.append((node.right, level + 1, right_id))
             adj_list[node_id].append(right_id)  # Add a connection from the current node to the right child
-    
-    # Create the tree visualization
-    labels = [node[1] for node in nodes]
-    levels = [node[2] for node in nodes]
+
+    hoverdata = ["feature="+label+"\n threshold="+str(threshold) 
+                 for label, threshold in zip(labels, thresholds) if threshold]
     max_level = max(levels)
 
     G = igraph.Graph()
@@ -178,21 +183,26 @@ def update_tree(n_clicks, tree_filename: str):
                 x=[x_s[node_i], x_s[conn]],
                 y=[y_s[node_i], y_s[conn]],
                 mode='lines',
-                line=dict(color='green')
+                line=dict(color='black')
             )
             line_traces.append(line_trace)
+
+    
+    hoverdata = [
+    f"Feature: {label}<br>Threshold: {threshold}"
+    for label, threshold in zip(labels, thresholds) if threshold
+    ]
 
 
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
-            x=x_s, y=y_s,
-            mode='markers+text',
-            marker=dict(size=40, color='black'),
-            text=labels,
-            textposition="middle center",
-            hovertemplate="%{text}<extra></extra>",
-            textfont=dict(color='white', size=20) 
-        )
+        x=x_s, y=y_s,
+        mode='markers',
+        marker=dict(size=40, color='#1f77b4'),
+        hoverinfo='text',
+        text=hoverdata,
+        hovertemplate="%{text}<extra></extra>",
+    )
     
     # Create the plotly figure for the tree
     figure = go.Figure(data=line_traces+[scatter])
@@ -204,9 +214,6 @@ def update_tree(n_clicks, tree_filename: str):
         height=900)
     
     return figure, False
-
-
-# Create a callback to fit the tree to the dataset when the fit button is clicked.
 
 # Run the app.
 app.run_server(debug=True)

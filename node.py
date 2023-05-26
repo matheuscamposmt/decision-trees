@@ -5,13 +5,14 @@ from utils import proportion
 
 class Node:
     count=0
-    def __init__(self, left, right, feature_idx=None, threshold=None):
+    def __init__(self, left, right, feature_idx=None, threshold=None, feature_name=None):
         self.id=Node.count
         Node.count += 1
 
         self.left: Node = left
         self.right: Node = right
         self.feature_idx = feature_idx
+        self.feature_name = feature_name
         self.threshold = threshold
 
     def predict(self, x: np.ndarray) -> float:
@@ -32,7 +33,7 @@ class Node:
 
 class LeafNode(Node):
     def __init__(self, data: Iterable):
-        super().__init__(None, None, None, None)
+        super().__init__(None, None)
         self.data = data
 
     def predict(self, X=None):

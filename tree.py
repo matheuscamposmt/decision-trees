@@ -4,11 +4,12 @@ from node import Node, LeafNode
 from itertools import count
 
 class DecisionTree:
-    def __init__(self, max_depth=None, min_samples_leaf=4):
+    def __init__(self, max_depth=None, min_samples_leaf=4, feature_names=[]):
         Node.count = 0
         self.root: Node = Node(None, None)
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
+        self.feature_names = feature_names
         self.classes = []
     
     def fit(self, X, y):
@@ -53,10 +54,6 @@ class DecisionTree:
             feature_data = data[:, feature_idx]
             labels = data[:, -1]
 
-            unique_data = np.sort(np.unique(feature_data))
-            if len(unique_data) < 2:
-                print(feature_data)
-                raise ValueError(f"Array too small: {unique_data}")
             # generate the thresholds
             thresholds = mean_adjacent(np.sort(feature_data), window_size=2)
             
@@ -96,7 +93,11 @@ class DecisionTree:
         left_node = self._grow(left_data, features_idx, depth=depth+1)
         right_node = self._grow(right_data, features_idx, depth=depth+1)
 
-        return Node(left_node, right_node, selected_feature, min_feature_threshold)
+        return Node(left_node, 
+                    right_node, 
+                    selected_feature, 
+                    min_feature_threshold, 
+                    feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None)
     
     def _traverse(self, node: Node):
         if node is None:

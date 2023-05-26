@@ -2,7 +2,8 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
 def mean_adjacent(arr: np.ndarray, window_size: int = 2) -> np.ndarray:
-
+    if len(arr) < 2:
+        return arr.squeeze()
     # Criando uma janela deslizante
     windowed_view = sliding_window_view(arr, window_size)
     
