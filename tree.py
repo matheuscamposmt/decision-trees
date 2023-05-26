@@ -86,9 +86,11 @@ class DecisionTree:
     def _grow(self, data, feature_idxs, depth=1):
         
         # Stopping criteria
-        if self.max_depth and depth > self.max_depth:
+        if self.max_depth and depth >= self.max_depth:
+            print(f"Limit depth reached: {depth}. Number of samples: {len(data)}")
             return LeafNode(data)
         if self.min_samples_leaf and (len(data) < self.min_samples_leaf):
+            print(f"Data with {len(data)} samples, returning LeafNode with depth {depth}")
             return LeafNode(data)
 
         selected_feature, min_feature_threshold, min_feature_cost = self._best_feature(data, feature_idxs)
