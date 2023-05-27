@@ -1,4 +1,5 @@
 import dash
+import dash_bootstrap_components as dbc
 from dash import html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -9,14 +10,13 @@ from sklearn.datasets import load_iris
 from typing import List
 import pickle
 
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR])
 
-
-app = dash.Dash(__name__)
 # Create a dropdown menu to select the dataset to use.
 dataset_options = [
     {'label': "Iris", 'value': "iris"},
     {'label': "Wine", 'value': "wine"},
-    {'label': "Breast Cancer" ,'value': "breast_cancer"}
+    {'label': "Breast Cancer", 'value': "breast_cancer"}
 ]
 
 dataset_dropdown = dcc.Dropdown(
@@ -40,33 +40,42 @@ min_samples_leaf_input = dcc.Input(
 )
 
 # Create a button to fit the tree to the dataset.
-fit_button = html.Button(
-    "Fit",
-    id="fit-button",
-    n_clicks=0
-)
+fit_button = dbc.Button("Fit", id="fit-button", color="primary", className="mr-3")
 
 graph = dcc.Graph(id='tree-graph')
 
-# Create a layout for the app.
-app.layout = html.Div(
+app.layout = dbc.Container(
     [
-        html.H1("Decision Tree Visualization"),
-        html.Div(
+        html.H1("Decision Tree Visualization", className="text-center mt-5 mb-3"),
+        dbc.Row(
             [
-                dataset_dropdown,
-                max_depth_input,
-                min_samples_leaf_input,
-                fit_button,
-                graph,
-                html.Button('Play', id='play-button', n_clicks=0),
-                dcc.Interval(id='animation-interval', interval=1000, n_intervals=0),
-                dcc.Store(id='tree_root_filename')
+                dbc.Col(dataset_dropdown, width=4, className="text-center"),
+                dbc.Col(max_depth_input, width=2, className="text-center"),
+                dbc.Col(min_samples_leaf_input, width=2, className="text-center"),
+                dbc.Col(fit_button, width=2, className="text-center"),
             ],
-            style={"width": "50%"},
+            className="mb-3",
+            justify="center"  # Align the row contents in the center
+        ),
+        dbc.Row(
+            dbc.Col(html.Button('Play', id='play-button', n_clicks=0), width=2, className="text-center"),
+            justify="center"  # Align the column contents in the center
+        ),
+        dbc.Row(
+            dbc.Col(graph, width=12, className="text-center"),
+            justify="center"  # Align the column contents in the center
+        ),
+        dbc.Row(
+            dbc.Col(dcc.Interval(id='animation-interval', interval=1000, n_intervals=0), width=2, className="text-center"),
+            justify="center"  # Align the column contents in the center
+        ),
+        dbc.Row(
+            dbc.Col(dcc.Store(id='tree_root_filename'), width=2, className="text-center"),
+            justify="center"  # Align the column contents in the center
         )
     ]
 )
+
 
 @app.callback(
     Output("tree_root_filename", "data"),
@@ -92,37 +101,34 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int)
     tree.fit(X, y)
 
     root = tree.root
-    filename="root.pkl"
+    filename = "root.pkl"
     with open(filename, 'wb') as root_file:
         pickle.dump(root, root_file)
 
     return filename
 
 
-# Define the callback function to update the tree visualization
 @app.callback(
     Output('tree-graph', 'figure'),
     Output('play-button', 'disabled'),
-    [Input('play-button', 'n_clicks')],#, Input('animation-interval', 'n_intervals')],
+    [Input('play-button', 'n_clicks')],
     State('tree_root_filename', 'data')
 )
 def update_tree(n_clicks, tree_filename: str):
     if n_clicks == 0:
         return dash.no_update, dash.no_update
-    #if n_intervals == 0:
-    #    return dash.no_update, dash.no_update
-    
+
     def count_nodes(tree):
         if tree is None:
             return 0
-        
+
         count = 1  # Start with the root node
-        
+
         count += count_nodes(tree.left)  # Recursively count nodes in the left subtree
         count += count_nodes(tree.right)  # Recursively count nodes in the right subtree
-    
+
         return count
-    
+
     with open(tree_filename, 'rb') as tree_file:
         tree = pickle.load(tree_file)
 
@@ -131,10 +137,10 @@ def update_tree(n_clicks, tree_filename: str):
 
     # Traversal algorithm to generate tree nodes in a list
     nodes = []
-    levels=[]
-    labels=[]
-    thresholds=[]
-    costs=[]
+    levels = []
+    labels = []
+    thresholds = []
+    costs = []
     queue = [(tree, 0, 0)]
 
     node_i = 0
@@ -145,20 +151,20 @@ def update_tree(n_clicks, tree_filename: str):
         labels.append(node.feature_name)
         thresholds.append(node.threshold)
         costs.append(node.gini_value)
-        
+
         if node.left:
             left_id = node_i + 1  # Assign a unique ID to the left child
             node_i += 1
             queue.append((node.left, level + 1, left_id))
             adj_list[node_id].append(left_id)  # Add a connection from the current node to the left child
-        
+
         if node.right:
             right_id = node_i + 1  # Assign a unique ID to the right child
             node_i += 1
             queue.append((node.right, level + 1, right_id))
             adj_list[node_id].append(right_id)  # Add a connection from the current node to the right child
 
-    hoverdata = ["feature="+label+"\n threshold="+str(threshold) 
+    hoverdata = ["feature="+label+"\n threshold="+str(threshold)
                  for label, threshold in zip(labels, thresholds) if threshold]
     max_level = max(levels)
 
@@ -178,7 +184,7 @@ def update_tree(n_clicks, tree_filename: str):
     x_s = [coord[0] for coord in coords]
     y_s = [max_level - coord[1] for coord in coords]
 
-    line_traces=[]
+    line_traces = []
     for node_i, node_connections in enumerate(adj_list):
         for conn in node_connections:
             line_trace = go.Scatter(
@@ -195,7 +201,6 @@ def update_tree(n_clicks, tree_filename: str):
     ]
     print(labels)
 
-
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
         x=x_s, y=y_s,
@@ -208,17 +213,18 @@ def update_tree(n_clicks, tree_filename: str):
             bgcolor="white"
         )
     )
-    
+
     # Create the plotly figure for the tree
-    figure = go.Figure(data=line_traces+[scatter])
+    figure = go.Figure(data=line_traces + [scatter])
     figure.update_layout(
         showlegend=False,
         xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
         yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
         width=1200,
-        height=900)
-    
+        height=900
+    )
+
     return figure, False
 
-# Run the app.
-app.run_server(debug=True)
+if __name__ == "__main__":
+    app.run_server(debug=True)
