@@ -83,10 +83,8 @@ app.layout = dbc.Container(
     [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-leaf-input", "value")],
 )
 def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int) -> List[Node]:
-    if n_clicks == 0:
+    if not n_clicks:
         return None
-
-    data = None
 
     # Load the dataset.
     if dataset_name.lower() == "iris":
@@ -98,6 +96,7 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int)
     X, y = data.data, data.target.reshape(-1 ,1)
     # Create a decision tree.
     tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf, feature_names=data.feature_names)
+    
     tree.fit(X, y)
 
     root = tree.root
