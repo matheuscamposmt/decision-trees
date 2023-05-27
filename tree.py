@@ -107,7 +107,8 @@ class DecisionTree:
                     right_node, 
                     selected_feature, 
                     min_feature_threshold, 
-                    feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None)
+                    feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None,
+                    gini_value = min_feature_cost)
     
     
     def _traverse(self, node: Node):

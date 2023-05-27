@@ -134,6 +134,7 @@ def update_tree(n_clicks, tree_filename: str):
     levels=[]
     labels=[]
     thresholds=[]
+    costs=[]
     queue = [(tree, 0, 0)]
 
     node_i = 0
@@ -143,6 +144,7 @@ def update_tree(n_clicks, tree_filename: str):
         levels.append(level)
         labels.append(node.feature_name)
         thresholds.append(node.threshold)
+        costs.append(node.gini_value)
         
         if node.left:
             left_id = node_i + 1  # Assign a unique ID to the left child
@@ -187,11 +189,11 @@ def update_tree(n_clicks, tree_filename: str):
             )
             line_traces.append(line_trace)
 
-    
     hoverdata = [
-    f"Feature: {label}<br>Threshold: {threshold}"
-    for label, threshold in zip(labels, thresholds) if threshold
+        f"<span style='color:brown'>Feature: {label}</span><br><span style='color:blue'>Threshold={threshold}</span><br><span style='color:green'>Gini={gini:.3f}</span>"
+        for label, threshold, gini in zip(labels, thresholds, costs) if threshold
     ]
+    print(labels)
 
 
     # Create scatter trace for the tree nodes
@@ -202,6 +204,9 @@ def update_tree(n_clicks, tree_filename: str):
         hoverinfo='text',
         text=hoverdata,
         hovertemplate="%{text}<extra></extra>",
+        hoverlabel=dict(
+            bgcolor="white"
+        )
     )
     
     # Create the plotly figure for the tree

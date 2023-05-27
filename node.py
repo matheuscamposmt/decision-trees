@@ -5,7 +5,7 @@ from utils import proportion
 
 class Node:
     count=0
-    def __init__(self, left, right, feature_idx=None, threshold=None, feature_name=None):
+    def __init__(self, left, right, feature_idx=None, threshold=None, feature_name=None, gini_value=None):
         self.id=Node.count
         Node.count += 1
 
@@ -14,6 +14,7 @@ class Node:
         self.feature_idx = feature_idx
         self.feature_name = feature_name
         self.threshold = threshold
+        self.gini_value = gini_value
 
     def predict(self, x: np.ndarray) -> float:
         if x[self.feature_idx] < self.threshold:
