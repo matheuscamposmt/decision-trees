@@ -25,54 +25,72 @@ dataset_dropdown = dcc.Dropdown(
     value="iris",
 )
 
-# Create a text input to enter the maximum depth of the tree.
-max_depth_input = dcc.Input(
-    id="max-depth-input",
-    type="number",
-    value=None,
-)
 
-# Create a text input to enter the minimum number of samples required to create a leaf node.
-min_samples_leaf_input = dcc.Input(
-    id="min-samples-leaf-input",
-    type="number",
-    value=None,
-)
 
 # Create a button to fit the tree to the dataset.
-fit_button = dbc.Button("Fit", id="fit-button", color="primary", className="mr-3")
+fit_button = dbc.Button("Fit", id="fit-button", 
+                        color="primary", className="mr-3", 
+                        n_clicks=0)
+show_button = dbc.Button("Show", id="show-button", 
+                         color="secondary", className="btn btn-outline-primary", 
+                         n_clicks=0)
+
+# Create a slider choose the maximum depth of the tree.
+max_depth_input = dbc.Input(
+    type='number',
+    id='max-depth-input',
+    value=5
+    )
+
+# Create a text input to enter the minimum number of samples required to create a leaf node.
+min_samples_leaf_input = dbc.Input(
+    type='number',
+    id='min-samples-leaf-input',
+    value=4
+)
+
+hyperparameters_input = dbc.Form(
+    dbc.Row(
+        [
+            dbc.Col(
+                [dbc.Label("Maximum levels", html_for='max-depth-slider', className="mr-2"),
+                max_depth_input]
+            ),
+            dbc.Col(
+                [dbc.Label(
+                "Minimum samples for a leaf node", 
+                html_for='min-samples-leaf-slider', 
+                className="mr-2"),
+                min_samples_leaf_input]
+            ),
+            dbc.Col(
+                [dbc.Label("Dataset", html_for='dataset-dropdown', className="mr-2"),
+                    dataset_dropdown]
+            ),
+            dbc.Col(fit_button, width=1, class_name='mx-1'),
+            dbc.Col(show_button, width=1, class_name='text-start')
+        ], align="end"
+    ), className='g-2'
+)
 
 graph = dcc.Graph(id='tree-graph')
 
 app.layout = dbc.Container(
     [
         html.H1("Decision Tree Visualization", className="text-center mt-5 mb-3"),
+        html.H4("Explore and understand decision trees with interactive visualization", className="text-center text-muted"),
         dbc.Row(
-            [
-                dbc.Col(dataset_dropdown, width=4, className="text-center"),
-                dbc.Col(max_depth_input, width=2, className="text-center"),
-                dbc.Col(min_samples_leaf_input, width=2, className="text-center"),
-                dbc.Col(fit_button, width=2, className="text-center"),
-            ],
-            className="mb-3",
-            justify="center"  # Align the row contents in the center
-        ),
-        dbc.Row(
-            dbc.Col(html.Button('Play', id='play-button', n_clicks=0), width=2, className="text-center"),
-            justify="center"  # Align the column contents in the center
-        ),
-        dbc.Row(
-            dbc.Col(graph, width=12, className="text-center"),
-            justify="center"  # Align the column contents in the center
+            dbc.Card([
+                dbc.CardBody([hyperparameters_input,graph])
+            ]
+                ),
+            justify="center", class_name="mt-5"  # Align the column contents in the center
         ),
         dbc.Row(
             dbc.Col(dcc.Interval(id='animation-interval', interval=1000, n_intervals=0), width=2, className="text-center"),
             justify="center"  # Align the column contents in the center
         ),
-        dbc.Row(
-            dbc.Col(dcc.Store(id='tree_root_filename'), width=2, className="text-center"),
-            justify="center"  # Align the column contents in the center
-        )
+        dcc.Store(id='tree_root_filename') # Align the column contents in the center
     ]
 )
 
@@ -83,7 +101,7 @@ app.layout = dbc.Container(
     [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-leaf-input", "value")],
 )
 def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int) -> List[Node]:
-    if not n_clicks:
+    if n_clicks == 0:
         return None
 
     # Load the dataset.
@@ -109,13 +127,23 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int)
 
 @app.callback(
     Output('tree-graph', 'figure'),
-    Output('play-button', 'disabled'),
-    [Input('play-button', 'n_clicks')],
+    Output('show-button', 'disabled'),
+    [Input('show-button', 'n_clicks')],
     State('tree_root_filename', 'data')
 )
 def update_tree(n_clicks, tree_filename: str):
+    # Create the plotly figure for the tree
+    figure = go.Figure()
+    figure.update_layout(
+        showlegend=False,
+        xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
+        width=1200,
+        height=900
+    )
+
     if n_clicks == 0:
-        return dash.no_update, dash.no_update
+        return figure, False
 
     def count_nodes(tree):
         if tree is None:
@@ -140,6 +168,7 @@ def update_tree(n_clicks, tree_filename: str):
     labels = []
     thresholds = []
     costs = []
+    n_samples = []
     queue = [(tree, 0, 0)]
 
     node_i = 0
@@ -150,6 +179,7 @@ def update_tree(n_clicks, tree_filename: str):
         labels.append(node.feature_name)
         thresholds.append(node.threshold)
         costs.append(node.gini_value)
+        n_samples.append(node.n_sample)
 
         if node.left:
             left_id = node_i + 1  # Assign a unique ID to the left child
@@ -195,10 +225,12 @@ def update_tree(n_clicks, tree_filename: str):
             line_traces.append(line_trace)
 
     hoverdata = [
-        f"<span style='color:brown'>Feature: {label}</span><br><span style='color:blue'>Threshold={threshold}</span><br><span style='color:green'>Gini={gini:.3f}</span>"
-        for label, threshold, gini in zip(labels, thresholds, costs) if threshold
+        f"""<span style='color:brown'>Feature: {label}</span>
+        <br><span style='color:blue'>Threshold={threshold}</span>
+        <br><span style='color:green'>Gini={gini:.3f}</span>
+        <br><span style='color:orange'>Samples={n_sample}</span>"""
+        for label, threshold, gini, n_sample in zip(labels, thresholds, costs, n_samples) if threshold
     ]
-    print(labels)
 
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
@@ -213,15 +245,7 @@ def update_tree(n_clicks, tree_filename: str):
         )
     )
 
-    # Create the plotly figure for the tree
-    figure = go.Figure(data=line_traces + [scatter])
-    figure.update_layout(
-        showlegend=False,
-        xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
-        width=1200,
-        height=900
-    )
+    figure.add_traces(line_traces + [scatter])
 
     return figure, False
 

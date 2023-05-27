@@ -97,7 +97,9 @@ class DecisionTree:
         
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
-        right_data = data[data[:, selected_feature] >= min_feature_threshold]
+        right_data = data[data[:, selected_feature] > min_feature_threshold]
+
+        print(len(right_data), len(left_data))
 
         # Create child nodes
         left_node = self._grow(left_data, feature_idxs, depth=depth+1)
@@ -108,7 +110,8 @@ class DecisionTree:
                     selected_feature, 
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None,
-                    gini_value = min_feature_cost)
+                    gini_value = min_feature_cost,
+                    n_sample = len(data))
     
     
     def _traverse(self, node: Node):
