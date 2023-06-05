@@ -19,12 +19,13 @@ def cost_function(l_labels, r_labels, classes):
     g_left = gini_impurity(classes, l_labels)
     g_right = gini_impurity(classes, r_labels)
 
-    return (g_left * m_left/m) + (g_right * m_right/m)
+    return g_left*(m_left/m) + g_right*(m_right/m)
 
 def proportion(class_, data):
+    m = len(data)
     if len(data) == 0:
         return 0
-    return len(data[data == class_]) / len(data)
+    return np.count_nonzero(data == class_) / m
 
 def gini(p_classes):
     return np.sum(p_classes**2)

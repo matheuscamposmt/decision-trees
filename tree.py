@@ -2,6 +2,7 @@ from utils import mean_adjacent, cost_function
 import numpy as np
 from node import Node, LeafNode
 
+EPSILON = np.finfo('double').eps
 class DecisionTree:
     def __init__(self, max_depth=None, min_samples_leaf=4, feature_names=[]):
         Node.count = 0
@@ -13,7 +14,8 @@ class DecisionTree:
     
     def fit(self, X, y):
         self.classes = np.unique(y)
-        self.root = self._grow(np.concatenate((X, y), axis=1), np.arange(X.shape[-1]))
+        
+        self.root = self._grow(np.hstack((X, y)), np.arange(X.shape[-1]))
     
     def predict(self, X):
         return np.apply_along_axis(self.root.predict, arr=X, axis=1)
@@ -46,6 +48,9 @@ class DecisionTree:
             # calculate the cost for the feature with the specific threshold
             cost = cost_function(left_labels, right_labels, 
                                 self.classes)
+            
+            if thresh == 1:
+                print(cost)
             
             split_costs.append(cost)
         
@@ -84,7 +89,7 @@ class DecisionTree:
         
 
     def _grow(self, data, feature_idxs, depth=1):
-        
+
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
             print(f"Limit depth reached: {depth}. Number of samples: {len(data)}")
@@ -94,12 +99,14 @@ class DecisionTree:
             return LeafNode(data)
 
         selected_feature, min_feature_threshold, min_feature_cost = self._best_feature(data, feature_idxs)
+
+        # Stopping criteria
+        if min_feature_cost < EPSILON:
+            return LeafNode(data)
         
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
         right_data = data[data[:, selected_feature] > min_feature_threshold]
-
-        print(len(right_data), len(left_data))
 
         # Create child nodes
         left_node = self._grow(left_data, feature_idxs, depth=depth+1)
