@@ -1,13 +1,13 @@
 import numpy as np
 from typing import Iterable
-from utils import proportion
+from utils import proportions, gini_impurity
 
 
 class Node:
     count=0
     def __init__(self, left, right, feature_idx=None, 
                  threshold=None, feature_name=None, 
-                 gini_value=None, n_sample=None):
+                 gini_value=None, n_sample=None, _class=None):
         self.id=Node.count
         Node.count += 1
 
@@ -16,8 +16,9 @@ class Node:
         self.feature_idx = feature_idx
         self.feature_name = feature_name
         self.threshold = threshold
-        self.gini_value = gini_value
+        self.gini= gini_value
         self.n_sample = n_sample
+        self._class = _class
 
     def predict(self, x: np.ndarray) -> float:
         if x[self.feature_idx] < self.threshold:
@@ -29,22 +30,16 @@ class Node:
         else:
             raise TypeError("Invalid type in input.")
         
-    def has_left_child(self) -> bool:
-        return self.left is not None
-    def has_right_child(self) -> bool:
-        return self.right is not None
-        
 
 class LeafNode(Node):
-    def __init__(self, data: Iterable):
+    def __init__(self, data: Iterable, gini=None, _class=None):
         super().__init__(None, None)
         self.data = data
+        self.classes = np.unique(data[:, -1])
+        self._class = _class
+        self.feature_idx = self._class
+        self.gini = gini
+        self.n_sample=len(data)
 
     def predict(self, X=None):
-        labels = self.data[:, -1]
-        classes = np.unique(labels,)
-        probs = []
-        for _class in classes:
-            probs.append(proportion(_class, self.data[:, -1]))
-
-        return int(classes[np.argmax(probs)])
+        return self._class

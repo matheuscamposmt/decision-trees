@@ -1,16 +1,17 @@
-from utils import mean_adjacent, cost_function
+from utils import mean_adjacent, cost_function, gini_impurity, get_majority
 import numpy as np
 from node import Node, LeafNode
 
 EPSILON = np.finfo('double').eps
 class DecisionTree:
-    def __init__(self, max_depth=None, min_samples_leaf=4, feature_names=[]):
+    def __init__(self, max_depth=None, min_samples_leaf=4, feature_names=[], class_names=[]):
         Node.count = 0
         self.root: Node = Node(None, None)
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.feature_names = feature_names
         self.classes = []
+        self.class_names = class_names
     
     def fit(self, X, y):
         self.classes = np.unique(y)
@@ -32,7 +33,7 @@ class DecisionTree:
         right_labels = labels[right_indices]
 
         if len(right_labels) == 0 and len(left_labels) == 0:
-            print(thresh, feature_data)
+            #print(thresh, feature_data)
             raise ValueError("")
         return (left_feature_data, left_labels), (right_feature_data, right_labels)
     
@@ -48,9 +49,6 @@ class DecisionTree:
             # calculate the cost for the feature with the specific threshold
             cost = cost_function(left_labels, right_labels, 
                                 self.classes)
-            
-            if thresh == 1:
-                print(cost)
             
             split_costs.append(cost)
         
@@ -72,7 +70,7 @@ class DecisionTree:
             labels = data[:, -1]
 
             # generate the thresholds
-            thresholds = mean_adjacent(np.sort(feature_data), window_size=2)
+            thresholds = mean_adjacent(np.unique(np.sort(feature_data)), window_size=2)
             
             min_thresh, min_split_cost = self._best_split(feature_data, labels, thresholds)
 
@@ -89,20 +87,21 @@ class DecisionTree:
         
 
     def _grow(self, data, feature_idxs, depth=1):
+        data_gini_impurity = gini_impurity(data[:, -1])
+        major_class = get_majority(self.classes, data[:, -1])
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
             print(f"Limit depth reached: {depth}. Number of samples: {len(data)}")
-            return LeafNode(data)
+            return LeafNode(data, gini=data_gini_impurity, _class = major_class)
         if self.min_samples_leaf and (len(data) < self.min_samples_leaf):
             print(f"Data with {len(data)} samples, returning LeafNode with depth {depth}")
-            return LeafNode(data)
+            return LeafNode(data, gini=data_gini_impurity, _class=major_class)
+        if data_gini_impurity < EPSILON:
+            return LeafNode(data, gini=data_gini_impurity, _class=major_class)
 
+        # splitting
         selected_feature, min_feature_threshold, min_feature_cost = self._best_feature(data, feature_idxs)
-
-        # Stopping criteria
-        if min_feature_cost < EPSILON:
-            return LeafNode(data)
         
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
@@ -118,7 +117,8 @@ class DecisionTree:
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None,
                     gini_value = min_feature_cost,
-                    n_sample = len(data))
+                    n_sample = len(data),
+                    _class=major_class)
     
     
     def _traverse(self, node: Node):

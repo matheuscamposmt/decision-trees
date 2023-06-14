@@ -16,8 +16,8 @@ def cost_function(l_labels, r_labels, classes):
     m_left, m_right = len(l_labels), len(r_labels)
     m = m_left + m_right
 
-    g_left = gini_impurity(classes, l_labels)
-    g_right = gini_impurity(classes, r_labels)
+    g_left = gini_impurity(l_labels)
+    g_right = gini_impurity(r_labels)
 
     return g_left*(m_left/m) + g_right*(m_right/m)
 
@@ -30,8 +30,15 @@ def proportion(class_, data):
 def gini(p_classes):
     return np.sum(p_classes**2)
 
-def gini_impurity(classes, y):
-    p_classes = np.apply_along_axis(lambda class_: proportion(class_, y), 
+def proportions(classes, y):
+    return np.apply_along_axis(lambda class_: proportion(class_, y), 
                                     arr=classes.reshape(-1, 1), 
                                     axis=1)
+
+def gini_impurity(y):
+    classes = np.unique(y)
+    p_classes = proportions(classes, y)
     return 1 - gini(p_classes)
+
+def get_majority(classes, y):
+    return np.argmax(proportions(classes , y))

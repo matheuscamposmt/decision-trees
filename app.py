@@ -1,8 +1,9 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import html, dcc, Input, Output, State
+from dash import html, dcc, Input, Output, State, dash_table
 import plotly.graph_objects as go
 import numpy as np
+import pandas as pd
 import igraph
 from node import Node
 from tree import DecisionTree
@@ -24,7 +25,6 @@ dataset_dropdown = dcc.Dropdown(
     options=dataset_options,
     value="iris",
 )
-
 
 
 # Create a button to fit the tree to the dataset.
@@ -73,27 +73,33 @@ hyperparameters_input = dbc.Form(
     ), className='g-2'
 )
 
+data_table = dash_table.DataTable(id='data_table_viz', data=[])
 graph = dcc.Graph(id='tree-graph')
+
+first_card = dbc.Card(dbc.CardBody([hyperparameters_input, graph]))
+second_card = dbc.Card(dbc.CardBody([data_table]))
 
 app.layout = dbc.Container(
     [
         html.H1("Decision Tree Visualization", className="text-center mt-5 mb-3"),
-        html.H4("Explore and understand decision trees with interactive visualization", className="text-center text-muted"),
+        html.H4("Explore and understand decision trees with a interactive visualization", className="text-center text-muted"),
         dbc.Row(
-            dbc.Card([
-                dbc.CardBody([hyperparameters_input,graph])
-            ]
-                ),
-            justify="center", class_name="mt-5"  # Align the column contents in the center
+            [dbc.Col(first_card), dbc.Col(second_card)],
+            justify="start",
+            className="mt-5"  # Add className instead of class_name
         ),
-        dbc.Row(
-            dbc.Col(dcc.Interval(id='animation-interval', interval=1000, n_intervals=0), width=2, className="text-center"),
-            justify="center"  # Align the column contents in the center
-        ),
+
         dcc.Store(id='tree_root_filename') # Align the column contents in the center
     ]
 )
 
+
+def load_dataset(name: str, as_frame=False):
+    if name.lower() == 'iris':
+        data = load_iris(as_frame=as_frame)
+        return data
+    
+    return np.loadtxt("data/" + name + ".csv", delimiter=",")
 
 @app.callback(
     Output("tree_root_filename", "data"),
@@ -104,17 +110,13 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int)
     if n_clicks == 0:
         return None
 
-    # Load the dataset.
-    if dataset_name.lower() == "iris":
-        data = load_iris()
-
-    else:
-        data = np.loadtxt("data/" + dataset_name + ".csv", delimiter=",")
+    # Load the dataset
+    data = load_dataset(dataset_name)
 
     X, y = data.data, data.target.reshape(-1 ,1)
     # Create a decision tree.
-    tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf, feature_names=data.feature_names)
-    
+    tree = DecisionTree(max_depth=max_depth, min_samples_leaf=min_samples_leaf, 
+                        feature_names=data.feature_names, class_names=data.target_names)
     tree.fit(X, y)
 
     root = tree.root
@@ -123,6 +125,26 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int)
         pickle.dump(root, root_file)
 
     return filename
+
+
+@app.callback(
+    [Output("data_table_viz", "data"), Output("data_table_viz", "columns")],
+    Input("show-button", "n_clicks"),
+    State("dataset-dropdown", "value")
+)
+def show_data_table(n_clicks, dataset_name: str):
+    if n_clicks == 0:
+        return [], []
+    dataset_loaded = load_dataset(dataset_name, as_frame=True)
+    targets = dataset_loaded.target
+    target_names =dataset_loaded.target_names
+    df =dataset_loaded.data
+
+    df["class"] = targets.apply(lambda class_: target_names[class_])
+
+    columns = [{"name": str(col), "id": str(col)} for col in df.columns]
+
+    return df.to_dict('records'),columns
 
 
 @app.callback(
@@ -162,39 +184,35 @@ def update_tree(n_clicks, tree_filename: str):
     tree_size = count_nodes(tree)
     adj_list = [[] for _ in range(tree_size)]
 
-    # Traversal algorithm to generate tree nodes in a list
     nodes = []
     levels = []
-    labels = []
-    thresholds = []
-    costs = []
-    n_samples = []
-    queue = [(tree, 0, 0)]
+    hoverdata = []
 
-    node_i = 0
+    # BFS to generate tree nodes in a list
+    queue = [(tree, 0, 0)]
+    id_counter = 0
     while queue:
         node, level, node_id = queue.pop(0)
         nodes.append(node)
         levels.append(level)
-        labels.append(node.feature_name)
-        thresholds.append(node.threshold)
-        costs.append(node.gini_value)
-        n_samples.append(node.n_sample)
 
+        hovertext =f"""<span style='color:brown'>Feature: {node.feature_name}</span>
+        <br><span style='color:blue'>Threshold={node.threshold}</span>
+        <br><span style='color:green'>Gini={node.gini:.3f}</span>
+        <br><span style='color:orange'>Samples={node.n_sample}</span>
+        <br><span style='color:black'>Class={node._class}</span>"""
+        hoverdata.append(hovertext)
+
+        parent_id = node_id
         if node.left:
-            left_id = node_i + 1  # Assign a unique ID to the left child
-            node_i += 1
-            queue.append((node.left, level + 1, left_id))
-            adj_list[node_id].append(left_id)  # Add a connection from the current node to the left child
-
+            id_counter += 1
+            queue.append((node.left, level + 1, id_counter))
+            adj_list[parent_id].append(id_counter)  # Add a connection from the current node to the left child
         if node.right:
-            right_id = node_i + 1  # Assign a unique ID to the right child
-            node_i += 1
-            queue.append((node.right, level + 1, right_id))
-            adj_list[node_id].append(right_id)  # Add a connection from the current node to the right child
-
-    hoverdata = ["feature="+label+"\n threshold="+str(threshold)
-                 for label, threshold in zip(labels, thresholds) if threshold]
+            id_counter += 1
+            queue.append((node.right, level + 1, id_counter))
+            adj_list[parent_id].append(id_counter)  # Add a connection from the current node to the right child
+    
     max_level = max(levels)
 
     G = igraph.Graph()
@@ -223,14 +241,6 @@ def update_tree(n_clicks, tree_filename: str):
                 line=dict(color='black')
             )
             line_traces.append(line_trace)
-
-    hoverdata = [
-        f"""<span style='color:brown'>Feature: {label}</span>
-        <br><span style='color:blue'>Threshold={threshold}</span>
-        <br><span style='color:green'>Gini={gini:.3f}</span>
-        <br><span style='color:orange'>Samples={n_sample}</span>"""
-        for label, threshold, gini, n_sample in zip(labels, thresholds, costs, n_samples) if threshold
-    ]
 
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
