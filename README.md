@@ -46,8 +46,20 @@ Here is an example of a decision tree:
 
 This decision tree is built using the CART algorithm and can be used to make predictions on new data.
 
+## Visualization
+
+The Decision Tree Visualization Web App provides an intuitive interface to interact with decision trees. Users can select different datasets, set hyperparameters such as the maximum depth and minimum samples for a leaf node, fit the decision tree to the dataset, and visualize the resulting decision tree. The web app dynamically updates the visualization as the user interacts with the controls.
+
+### Features of the Web App
+
+- Dataset Selection: Users can choose from a dropdown menu to select the dataset they want to use for training the decision tree. Currently available datasets include Iris, Wine, and Breast Cancer datasets.
+- Hyperparameter Controls: Users can adjust the maximum depth and minimum number of samples required to create a leaf node using input fields.
+- Fit Button: Clicking the "Fit" button trains the decision tree using the selected dataset and hyperparameters.
+- Show Button: Clicking the "Show" button generates an interactive visualization of the decision tree.
+- Decision Tree Visualization: The web app displays the decision tree as a graph, where each node represents a decision point and each edge represents a split based on a specific feature and threshold. Users can hover over the nodes to view additional information such as the feature name, threshold value, Gini impurity, and number of samples.
+
+The web app is built using the Dash framework and incorporates Bootstrap components for styling. The decision tree visualization is generated using Plotly's graph objects. The DecisionTree class and related classes from the previous implementation are utilized to train the decision tree and extract information needed for visualization.
+
 ## Conclusion
 
-This implementation showcases the Decision Tree algorithm built from scratch using the CART algorithm. It provides a fundamental understanding of the inner workings of decision trees and serves as a solid foundation for more advanced tree-based models. With its versatility in handling both classification and regression tasks, the Decision Tree algorithm can be customized and applied to a wide range of real-world applications.
-
-For more information and usage examples, please refer to the [Documentation](docs/documentation.md).
+This implementation showcases the Decision Tree algorithm built from scratch using the CART algorithm. It provides an interactive and intuitive way to explore and understand decision trees by visualizing the decision tree structure and its decision-making process. The source code provides a easy understanding of the inner workings of decision trees and serves as a solid foundation for more advanced tree-based models. With its versatility in handling both classification and regression tasks, the Decision Tree algorithm can be customized and applied to a wide range of real-world applications.
