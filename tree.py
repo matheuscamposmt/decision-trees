@@ -28,7 +28,7 @@ class DecisionTree:
         left_labels = labels[left_indices]
 
         #splitting right
-        right_indices  = feature_data > thresh
+        right_indices  = feature_data >= thresh
         right_feature_data = feature_data[right_indices]
         right_labels = labels[right_indices]
 
@@ -71,6 +71,7 @@ class DecisionTree:
 
             # generate the thresholds
             thresholds = mean_adjacent(np.unique(np.sort(feature_data)), window_size=2)
+            print(thresholds, (np.sort(feature_data)))
             
             min_thresh, min_split_cost = self._best_split(feature_data, labels, thresholds)
 
@@ -89,23 +90,27 @@ class DecisionTree:
     def _grow(self, data, feature_idxs, depth=1):
         data_gini_impurity = gini_impurity(data[:, -1])
         major_class = get_majority(self.classes, data[:, -1])
+        print(data_gini_impurity)
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
-            print(f"Limit depth reached: {depth}. Number of samples: {len(data)}")
-            return LeafNode(data, gini=data_gini_impurity, _class = major_class)
+            #print(f"Limit depth reached: {depth}. Number of samples: {len(data)}")
+            return LeafNode(data, gini=data_gini_impurity, 
+                            _class = major_class, class_name=self.class_names[major_class])
         if self.min_samples_leaf and (len(data) < self.min_samples_leaf):
-            print(f"Data with {len(data)} samples, returning LeafNode with depth {depth}")
-            return LeafNode(data, gini=data_gini_impurity, _class=major_class)
+            #print(f"Data with {len(data)} samples, returning LeafNode with depth {depth}")
+            return LeafNode(data, gini=data_gini_impurity, 
+                            _class=major_class, class_name=self.class_names[major_class])
         if data_gini_impurity < EPSILON:
-            return LeafNode(data, gini=data_gini_impurity, _class=major_class)
+            return LeafNode(data, gini=data_gini_impurity, 
+                            _class=major_class,class_name=self.class_names[major_class])
 
         # splitting
         selected_feature, min_feature_threshold, min_feature_cost = self._best_feature(data, feature_idxs)
         
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
-        right_data = data[data[:, selected_feature] > min_feature_threshold]
+        right_data = data[data[:, selected_feature] >= min_feature_threshold]
 
         # Create child nodes
         left_node = self._grow(left_data, feature_idxs, depth=depth+1)
@@ -116,11 +121,11 @@ class DecisionTree:
                     selected_feature, 
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None,
-                    gini_value = min_feature_cost,
-                    n_sample = len(data),
-                    _class=major_class)
+                    gini_value = data_gini_impurity,
+                    n_sample = len(data), _class=major_class,
+                    class_name=self.class_names[major_class])
     
-    
+    #DFS
     def _traverse(self, node: Node):
         if node is None:
             return []

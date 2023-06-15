@@ -7,7 +7,8 @@ class Node:
     count=0
     def __init__(self, left, right, feature_idx=None, 
                  threshold=None, feature_name=None, 
-                 gini_value=None, n_sample=None, _class=None):
+                 gini_value=None, n_sample=None, _class=None, 
+                 class_name=None):
         self.id=Node.count
         Node.count += 1
 
@@ -19,6 +20,7 @@ class Node:
         self.gini= gini_value
         self.n_sample = n_sample
         self._class = _class
+        self.class_name = class_name
 
     def predict(self, x: np.ndarray) -> float:
         if x[self.feature_idx] < self.threshold:
@@ -32,7 +34,7 @@ class Node:
         
 
 class LeafNode(Node):
-    def __init__(self, data: Iterable, gini=None, _class=None):
+    def __init__(self, data: Iterable, gini=None, _class=None, class_name=None):
         super().__init__(None, None)
         self.data = data
         self.classes = np.unique(data[:, -1])
@@ -40,6 +42,7 @@ class LeafNode(Node):
         self.feature_idx = self._class
         self.gini = gini
         self.n_sample=len(data)
+        self.class_name=class_name
 
     def predict(self, X=None):
         return self._class

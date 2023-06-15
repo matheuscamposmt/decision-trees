@@ -11,13 +11,14 @@ from sklearn.datasets import load_iris
 from typing import List
 import pickle
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR],
+                )
 
 # Create a dropdown menu to select the dataset to use.
 dataset_options = [
     {'label': "Iris", 'value': "iris"},
-    {'label': "Wine", 'value': "wine"},
-    {'label': "Breast Cancer", 'value': "breast_cancer"}
+#    {'label': "Wine", 'value': "wine"},
+#    {'label': "Breast Cancer", 'value': "breast_cancer"}
 ]
 
 dataset_dropdown = dcc.Dropdown(
@@ -76,8 +77,8 @@ hyperparameters_input = dbc.Form(
 data_table = dash_table.DataTable(id='data_table_viz', data=[])
 graph = dcc.Graph(id='tree-graph')
 
-first_card = dbc.Card(dbc.CardBody([hyperparameters_input, graph]))
-second_card = dbc.Card(dbc.CardBody([data_table]))
+first_card = dbc.Card(dbc.CardBody([hyperparameters_input, graph]), style={"height": 1000})
+second_card = dbc.Card(dbc.CardBody([html.H5("Random sample with 20 observations from the data", className="text-center mt-5 mb-3"), data_table]))
 
 app.layout = dbc.Container(
     [
@@ -86,11 +87,11 @@ app.layout = dbc.Container(
         dbc.Row(
             [dbc.Col(first_card), dbc.Col(second_card)],
             justify="start",
-            className="mt-5"  # Add className instead of class_name
+            #className="mt-5"  # Add className instead of class_name
         ),
 
         dcc.Store(id='tree_root_filename') # Align the column contents in the center
-    ]
+    ], fluid=True
 )
 
 
@@ -138,7 +139,7 @@ def show_data_table(n_clicks, dataset_name: str):
     dataset_loaded = load_dataset(dataset_name, as_frame=True)
     targets = dataset_loaded.target
     target_names =dataset_loaded.target_names
-    df =dataset_loaded.data
+    df =dataset_loaded.data.sample(20)
 
     df["class"] = targets.apply(lambda class_: target_names[class_])
 
@@ -160,8 +161,10 @@ def update_tree(n_clicks, tree_filename: str):
         showlegend=False,
         xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
         yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
-        width=1200,
-        height=900
+        #width=900,
+        height=900,
+        autosize=True,
+        margin=dict(l=20, r=20, t=30, b=20),
     )
 
     if n_clicks == 0:
@@ -198,9 +201,9 @@ def update_tree(n_clicks, tree_filename: str):
 
         hovertext =f"""<span style='color:brown'>Feature: {node.feature_name}</span>
         <br><span style='color:blue'>Threshold={node.threshold}</span>
-        <br><span style='color:green'>Gini={node.gini:.3f}</span>
+        <br><span style='color:green'>Gini={node.gini:.4f}</span>
         <br><span style='color:orange'>Samples={node.n_sample}</span>
-        <br><span style='color:black'>Class={node._class}</span>"""
+        <br><span style='color:black'>Class={node.class_name}</span>"""
         hoverdata.append(hovertext)
 
         parent_id = node_id

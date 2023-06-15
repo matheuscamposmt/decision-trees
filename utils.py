@@ -3,12 +3,13 @@ from numpy.lib.stride_tricks import sliding_window_view
 
 def mean_adjacent(arr: np.ndarray, window_size: int = 2) -> np.ndarray:
     if len(arr) < 2:
-        return arr.squeeze()
+        return arr
     # Criando uma janela deslizante
     windowed_view = sliding_window_view(arr, window_size)
     
     # Calculate the mean of each subarray of adjacent numbers
     means = np.mean(windowed_view, axis=1)
+    print(means)
     
     return means
 
@@ -36,6 +37,8 @@ def proportions(classes, y):
                                     axis=1)
 
 def gini_impurity(y):
+    if len(y) == 0:
+        return 0
     classes = np.unique(y)
     p_classes = proportions(classes, y)
     return 1 - gini(p_classes)
