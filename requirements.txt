@@ -5,3 +5,4 @@ pandas==1.4.2
 plotly==5.13.0
 python_igraph==0.10.4
 scikit_learn==1.2.2
+gunicorn==19.7.1
