@@ -32,9 +32,6 @@ class DecisionTree:
         right_feature_data = feature_data[right_indices]
         right_labels = labels[right_indices]
 
-        if len(right_labels) == 0 and len(left_labels) == 0:
-            #print(thresh, feature_data)
-            raise ValueError("")
         return (left_feature_data, left_labels), (right_feature_data, right_labels)
     
     def _best_split(self, feature_data: np.ndarray, labels: np.ndarray, thresholds):
@@ -71,8 +68,6 @@ class DecisionTree:
 
             # generate the thresholds
             thresholds = mean_adjacent(np.unique(np.sort(feature_data)), window_size=2)
-            print(thresholds, (np.sort(feature_data)))
-            
             min_thresh, min_split_cost = self._best_split(feature_data, labels, thresholds)
 
             feature_costs.append(min_split_cost)
@@ -90,7 +85,6 @@ class DecisionTree:
     def _grow(self, data, feature_idxs, depth=1):
         data_gini_impurity = gini_impurity(data[:, -1])
         major_class = get_majority(self.classes, data[:, -1])
-        print(data_gini_impurity)
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:

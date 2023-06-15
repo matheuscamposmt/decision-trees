@@ -11,8 +11,8 @@ from sklearn.datasets import load_iris
 from typing import List
 import pickle
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR],
-                )
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR])
+server= app.server
 
 # Create a dropdown menu to select the dataset to use.
 dataset_options = [
@@ -46,7 +46,7 @@ max_depth_input = dbc.Input(
 # Create a text input to enter the minimum number of samples required to create a leaf node.
 min_samples_leaf_input = dbc.Input(
     type='number',
-    id='min-samples-leaf-input',
+    id='min-samples-split-input',
     value=4
 )
 
@@ -59,8 +59,8 @@ hyperparameters_input = dbc.Form(
             ),
             dbc.Col(
                 [dbc.Label(
-                "Minimum samples for a leaf node", 
-                html_for='min-samples-leaf-slider', 
+                "Minimum samples for a node to split", 
+                html_for='min-samples-split-slider', 
                 className="mr-2"),
                 min_samples_leaf_input]
             ),
@@ -105,7 +105,7 @@ def load_dataset(name: str, as_frame=False):
 @app.callback(
     Output("tree_root_filename", "data"),
     [Input("fit-button", "n_clicks")],
-    [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-leaf-input", "value")],
+    [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-split-input", "value")],
 )
 def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_leaf: int) -> List[Node]:
     if n_clicks == 0:
@@ -154,7 +154,7 @@ def show_data_table(n_clicks, dataset_name: str):
     [Input('show-button', 'n_clicks')],
     State('tree_root_filename', 'data')
 )
-def update_tree(n_clicks, tree_filename: str):
+def build_tree(n_clicks, tree_filename: str):
     # Create the plotly figure for the tree
     figure = go.Figure()
     figure.update_layout(
