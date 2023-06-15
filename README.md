@@ -42,7 +42,7 @@ The main recursive function responsible for building the decision tree is `_grow
 
 Here is an example of a decision tree:
 
-![Decision Tree Example](https://miro.medium.com/v2/resize:fit:720/format:webp/1*fGX0_gacojVa6-njlCrWZw.png)
+![Decision Tree Example](https://scikit-learn.org/stable/_images/iris.svg)
 
 This decision tree is built using the CART algorithm and can be used to make predictions on new data.
 
