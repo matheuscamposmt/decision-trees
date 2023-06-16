@@ -1,6 +1,6 @@
-from utils import mean_adjacent, cost_function, gini_impurity, get_majority
+from dt_algorithm.utils import mean_adjacent, cost_function, gini_impurity, get_majority
 import numpy as np
-from node import Node, LeafNode
+from .node import Node, LeafNode
 
 EPSILON = np.finfo('double').eps
 class DecisionTree:

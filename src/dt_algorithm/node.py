@@ -1,6 +1,5 @@
 import numpy as np
 from typing import Iterable
-from utils import proportions, gini_impurity
 
 
 class Node:
