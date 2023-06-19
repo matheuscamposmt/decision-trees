@@ -1,65 +1,67 @@
-# Decision Tree from Scratch using Python and NumPy
+# Árvore de Decisão do Zero usando Python e NumPy
 
-![Decision Tree Illustration](https://www.xoriant.com/cdn/ff/weqpbrtpXGjLpVQ_X-gWqsFlvjAxpv5Wv3xNW0A4vuQ/1602007254/public/2020-10/a-decisionTreesforClassification-AMachineLearningAlgorithm.jpg)
+![Ilustração da Árvore de Decisão](https://www.xoriant.com/cdn/ff/weqpbrtpXGjLpVQ_X-gWqsFlvjAxpv5Wv3xNW0A4vuQ/1602007254/public/2020-10/a-decisionTreesforClassification-AMachineLearningAlgorithm.jpg)
 
-This repository contains an implementation of the Decision Tree algorithm from scratch using the CART (Classification and Regression Trees) algorithm. The decision tree is a powerful algorithm widely used for building models that can handle both classification and regression tasks. This implementation is written in Python and utilizes the NumPy library for efficient numerical computations.
+Este repositório contém uma implementação do algoritmo de Árvore de Decisão do zero usando o algoritmo CART (Árvores de Classificação e Regressão). A árvore de decisão é um algoritmo poderoso amplamente utilizado para construir modelos capazes de lidar tanto com tarefas de classificação quanto de regressão. Essa implementação é escrita em Python e utiliza a biblioteca NumPy para cálculos numéricos eficientes.
 
-## Overview of the Decision Tree Algorithm
+## Visão geral do algoritmo de Árvore de Decisão
 
-The Decision Tree algorithm constructs a tree-like model of decisions and their potential outcomes, incorporating chance event results, resource costs, and utility considerations. It recursively partitions the data into subsets based on the values of selected features, creating decision nodes. At each node, the algorithm identifies the feature that offers the optimal split of the data, and this process continues until a stopping criterion is met. The resulting tree can then be used to make predictions on new, unseen data.
+O algoritmo de Árvore de Decisão constrói um modelo em forma de árvore de decisões e seus resultados potenciais, incorporando resultados de eventos aleatórios, custos de recursos e considerações de utilidade. Ele particiona recursivamente os dados em subconjuntos com base nos valores das características selecionadas, criando nós de decisão. Em cada nó, o algoritmo identifica a característica que oferece a divisão ótima dos dados, e esse processo continua até que um critério de parada seja atendido. A árvore resultante pode então ser usada para fazer previsões em novos dados não vistos.
 
-### Decision Tree Algorithm Illustration
+### Ilustração do algoritmo de Árvore de Decisão
 
-Here is an illustration of the Decision Tree algorithm:
+Aqui está uma ilustração do algoritmo de Árvore de Decisão:
 
-![Decision Tree Algorithm](https://www.saedsayad.com/images/Decision_Tree_1.png)
+![Algoritmo de Árvore de Decisão](https://www.saedsayad.com/images/Decision_Tree_1.png)
 
-## CART Algorithm
+## Algoritmo CART
 
-The Classification and Regression Trees (CART) algorithm is a popular decision tree algorithm that can handle both classification and regression tasks. The CART algorithm partitions the data recursively, selecting a single feature and threshold to split the data based on either the Gini impurity measure for classification or the sum of squared errors for regression. This selection process is repeated until a stopping criterion is satisfied.
+O algoritmo de Árvores de Classificação e Regressão (CART) é um algoritmo popular de árvore de decisão que pode lidar tanto com tarefas de classificação quanto de regressão. O algoritmo CART particiona os dados recursivamente, selecionando uma única característica e limite para dividir os dados com base na medida de impureza de Gini para classificação ou na soma dos erros quadrados para regressão. Esse processo de seleção é repetido até que um critério de parada seja satisfeito.
 
-### CART Algorithm Process
+### Processo do algoritmo CART
 
-The following table summarizes the process of the CART algorithm:
+A tabela a seguir resume o processo do algoritmo CART:
 
-| Step | Description |
+| Passo | Descrição |
 |------|-------------|
-| 1.   | Select the best feature to split the data based on a specific criterion (Gini impurity or sum of squared errors). |
-| 2.   | Partition the data based on the selected feature and threshold. |
-| 3.   | Repeat steps 1 and 2 recursively for each subset until a stopping criterion is met. |
-| 4.   | Create decision nodes and leaf nodes based on the splits. |
-| 5.   | Assign the majority class (classification) or the mean value (regression) to the leaf nodes. |
+| 1.   | Selecionar a melhor característica para dividir os dados com base em um critério específico (impureza de Gini ou soma dos erros quadrados). |
+| 2.   | Particionar os dados com base na característica e limite selecionados. |
+| 3.   | Repetir os passos 1 e 2 recursivamente para cada subconjunto até que um critério de parada seja atendido. |
+| 4.   | Criar nós de decisão e nós folha com base nas divisões. |
+| 5.   | Atribuir a classe majoritária (classificação) ou o valor médio (regressão) aos nós folha. |
 
-## Implementation Details
+## Detalhes da Implementação
 
-This implementation of the Decision Tree algorithm employs the CART algorithm for data partitioning at each node. The main class, `DecisionTree`, consists of two essential methods: `fit` and `predict`. The `fit` method accepts a numpy array `X` containing the input features and a numpy array `y` containing the corresponding target values. It then trains the decision tree using the provided data. On the other hand, the `predict` method accepts a numpy array `X` of input features and returns the predicted target values.
 
-The `DecisionTree` class utilizes a `Node` class to represent internal nodes of the decision tree and a `LeafNode` class to represent the leaf nodes. The `Node` class contains attributes such as left and right child nodes, a selected feature index, and a threshold value for data partitioning at the node. Conversely, the `LeafNode` class stores the target value for the leaf node.
 
-The main recursive function responsible for building the decision tree is `_grow`. This function takes the training data and a list of feature indices as inputs and returns the root node of the decision tree. Additionally, the `_split_data` method is used to split the data into left and right subsets based on the selected feature and threshold.
+Essa implementação do algoritmo de Árvore de Decisão utiliza o algoritmo CART para particionar os dados em cada nó. A classe principal, `DecisionTree`, consiste em dois métodos essenciais: `fit` e `predict`. O método `fit` aceita uma matriz numpy `X` contendo as características de entrada e uma matriz numpy `y` contendo os valores-alvo correspondentes. Em seguida, ele treina a árvore de decisão usando os dados fornecidos. Por outro lado, o método `predict` aceita uma matriz numpy `X` de características de entrada e retorna os valores-alvo previstos.
 
-### Decision Tree Example
+A classe `DecisionTree` utiliza uma classe `Node` para representar nós internos da árvore de decisão e uma classe `LeafNode` para representar os nós folha. A classe `Node` contém atributos como nós filhos esquerdo e direito, um índice de característica selecionada e um valor limite para particionamento de dados no nó. Por outro lado, a classe `LeafNode` armazena o valor-alvo para o nó folha.
 
-Here is an example of a decision tree:
+A principal função recursiva responsável por construir a árvore de decisão é `_grow`. Essa função recebe os dados de treinamento e uma lista de índices de características como entrada e retorna o nó raiz da árvore de decisão. Além disso, o método `_split_data` é usado para dividir os dados em subconjuntos esquerdo e direito com base na característica e no limite selecionados.
 
-![Decision Tree Example](https://scikit-learn.org/stable/_images/iris.svg)
+### Exemplo de Árvore de Decisão
 
-This decision tree is built using the CART algorithm and can be used to make predictions on new data.
+Aqui está um exemplo de árvore de decisão:
 
-## Visualization
+![Exemplo de Árvore de Decisão](https://scikit-learn.org/stable/_images/iris.svg)
 
-The Decision Tree Visualization Web App provides an intuitive interface to interact with decision trees. Users can select different datasets, set hyperparameters such as the maximum depth and minimum samples for a leaf node, fit the decision tree to the dataset, and visualize the resulting decision tree. The web app dynamically updates the visualization as the user interacts with the controls.
+Essa árvore de decisão é construída usando o algoritmo CART e pode ser usada para fazer previsões em novos dados.
 
-### Features of the Web App
+## Visualização
 
-- Dataset Selection: Users can choose from a dropdown menu to select the dataset they want to use for training the decision tree. Currently available datasets include Iris, Wine, and Breast Cancer datasets.
-- Hyperparameter Controls: Users can adjust the maximum depth and minimum number of samples required to create a leaf node using input fields.
-- Fit Button: Clicking the "Fit" button trains the decision tree using the selected dataset and hyperparameters.
-- Show Button: Clicking the "Show" button generates an interactive visualization of the decision tree.
-- Decision Tree Visualization: The web app displays the decision tree as a graph, where each node represents a decision point and each edge represents a split based on a specific feature and threshold. Users can hover over the nodes to view additional information such as the feature name, threshold value, Gini impurity, and number of samples.
+O Aplicativo Web de Visualização da Árvore de Decisão fornece uma interface intuitiva para interagir com árvores de decisão. Os usuários podem selecionar conjuntos de dados diferentes, configurar hiperparâmetros como a profundidade máxima e o número mínimo de amostras para um nó folha, ajustar a árvore de decisão ao conjunto de dados e visualizar a árvore de decisão resultante. O aplicativo web atualiza dinamicamente a visualização à medida que o usuário interage com os controles.
 
-The web app is built using the Dash framework and incorporates Bootstrap components for styling. The decision tree visualization is generated using Plotly's graph objects. The DecisionTree class and related classes from the previous implementation are utilized to train the decision tree and extract information needed for visualization.
+### Recursos do Aplicativo Web
 
-## Conclusion
+- Seleção do Conjunto de Dados: Os usuários podem escolher em um menu suspenso o conjunto de dados que desejam usar para treinar a árvore de decisão. Os conjuntos de dados atualmente disponíveis incluem Iris, Wine e conjuntos de dados de câncer de mama.
+- Controles de Hiperparâmetros: Os usuários podem ajustar a profundidade máxima e o número mínimo de amostras necessárias para criar um nó folha usando campos de entrada.
+- Botão "Fit": Ao clicar no botão "Fit", a árvore de decisão é treinada usando o conjunto de dados e hiperparâmetros selecionados.
+- Botão "Show": Uma visualização interativa da árvore de decisão é gerada.
+- Visualização da Árvore de Decisão: O aplicativo web exibe a árvore de decisão como um gráfico, onde cada nó representa um ponto de decisão e cada aresta representa uma divisão com base em uma característica e limite específicos. Os usuários podem passar o mouse sobre os nós para visualizar informações adicionais, como o nome da característica, valor limite, impureza de Gini e número de amostras.
 
-This implementation showcases the Decision Tree algorithm built from scratch using the CART algorithm. It provides an interactive and intuitive way to explore and understand decision trees by visualizing the decision tree structure and its decision-making process. The source code provides a easy understanding of the inner workings of decision trees and serves as a solid foundation for more advanced tree-based models. With its versatility in handling both classification and regression tasks, the Decision Tree algorithm can be customized and applied to a wide range of real-world applications.
+O aplicativo web é construído usando o framework Dash e incorpora componentes Bootstrap para estilização. A visualização da árvore de decisão é gerada usando objetos de gráficos do Plotly. A classe DecisionTree e classes relacionadas da implementação anterior são utilizadas para treinar a árvore de decisão e extrair as informações necessárias para a visualização.
+
+## Conclusão
+
+Essa implementação apresenta o algoritmo de Árvore de Decisão construído do zero usando o algoritmo CART. Ela fornece uma maneira interativa e intuitiva de explorar e entender as árvores de decisão, visualizando a estrutura da árvore de decisão e seu processo de tomada de decisão. O código-fonte proporciona um entendimento fácil do funcionamento interno das árvores de decisão.
