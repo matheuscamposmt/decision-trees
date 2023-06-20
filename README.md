@@ -6,7 +6,7 @@ Este repositório contém uma implementação do algoritmo de Árvore de Decisã
 
 ## Visão geral do algoritmo de Árvore de Decisão
 
-O algoritmo de Árvore de Decisão constrói um modelo em forma de árvore de decisões e seus resultados potenciais, incorporando resultados de eventos aleatórios, custos de recursos e considerações de utilidade. Ele particiona recursivamente os dados em subconjuntos com base nos valores das características selecionadas, criando nós de decisão. Em cada nó, o algoritmo identifica a característica que oferece a divisão ótima dos dados, e esse processo continua até que um critério de parada seja atendido. A árvore resultante pode então ser usada para fazer previsões em novos dados não vistos.
+O algoritmo de Árvore de Decisão constrói um modelo em forma de uma árvore de decisões. Ele particiona recursivamente os dados em subconjuntos com base nos valores das características selecionadas, criando nós de decisão. Em cada nó, o algoritmo identifica a característica que oferece a divisão ótima dos dados, e esse processo continua até que um critério de parada seja atendido. A árvore resultante pode então ser usada para fazer previsões em novos dados.
 
 ### Ilustração do algoritmo de Árvore de Decisão
 
@@ -16,7 +16,7 @@ Aqui está uma ilustração do algoritmo de Árvore de Decisão:
 
 ## Algoritmo CART
 
-O algoritmo de Árvores de Classificação e Regressão (CART) é um algoritmo popular de árvore de decisão que pode lidar tanto com tarefas de classificação quanto de regressão. O algoritmo CART particiona os dados recursivamente, selecionando uma única característica e limite para dividir os dados com base na medida de impureza de Gini para classificação ou na soma dos erros quadrados para regressão. Esse processo de seleção é repetido até que um critério de parada seja satisfeito.
+O algoritmo CART é um algoritmo popular de árvore de decisão que pode lidar tanto com tarefas de classificação quanto de regressão. O algoritmo CART particiona os dados recursivamente, selecionando uma única característica e limite para dividir os dados com base na medida de impureza de Gini para classificação ou na soma dos erros quadrados para regressão. Esse processo de seleção é repetido até que um critério de parada seja satisfeito.
 
 ### Processo do algoritmo CART
 
@@ -32,13 +32,11 @@ A tabela a seguir resume o processo do algoritmo CART:
 
 ## Detalhes da Implementação
 
-
-
-Essa implementação do algoritmo de Árvore de Decisão utiliza o algoritmo CART para particionar os dados em cada nó. A classe principal, `DecisionTree`, consiste em dois métodos essenciais: `fit` e `predict`. O método `fit` aceita uma matriz numpy `X` contendo as características de entrada e uma matriz numpy `y` contendo os valores-alvo correspondentes. Em seguida, ele treina a árvore de decisão usando os dados fornecidos. Por outro lado, o método `predict` aceita uma matriz numpy `X` de características de entrada e retorna os valores-alvo previstos.
+Essa implementação do algoritmo particiona os dados em cada nó. A classe principal, `DecisionTree`, consiste em dois métodos essenciais: `fit` e `predict`. O método `fit` aceita uma matriz numpy `X` contendo as características de entrada e uma matriz numpy `y` contendo os valores-alvo correspondentes. Em seguida, ele treina a árvore de decisão usando os dados fornecidos. O método `predict` aceita uma matriz numpy `X` de características de entrada e retorna os valores-alvo previstos.
 
 A classe `DecisionTree` utiliza uma classe `Node` para representar nós internos da árvore de decisão e uma classe `LeafNode` para representar os nós folha. A classe `Node` contém atributos como nós filhos esquerdo e direito, um índice de característica selecionada e um valor limite para particionamento de dados no nó. Por outro lado, a classe `LeafNode` armazena o valor-alvo para o nó folha.
 
-A principal função recursiva responsável por construir a árvore de decisão é `_grow`. Essa função recebe os dados de treinamento e uma lista de índices de características como entrada e retorna o nó raiz da árvore de decisão. Além disso, o método `_split_data` é usado para dividir os dados em subconjuntos esquerdo e direito com base na característica e no limite selecionados.
+A principal função recursiva responsável por construir a árvore de decisão é `_grow`. Essa função recebe os dados de treinamento e uma lista de índices de características como entrada e retorna o nó raiz da árvore de decisão. Além disso, o método `_split_data` é usado para dividir os dados em subconjuntos esquerdo e direito com base no par (atributo, limiar).
 
 ### Exemplo de Árvore de Decisão
 
@@ -64,4 +62,4 @@ O aplicativo web é construído usando o framework Dash e incorpora componentes 
 
 ## Conclusão
 
-Essa implementação apresenta o algoritmo de Árvore de Decisão construído do zero usando o algoritmo CART. Ela fornece uma maneira interativa e intuitiva de explorar e entender as árvores de decisão, visualizando a estrutura da árvore de decisão e seu processo de tomada de decisão. O código-fonte proporciona um entendimento fácil do funcionamento interno das árvores de decisão.
+Essa implementação apresenta as Árvores de Decisão construídas do zero com o algoritmo CART. Ela fornece uma maneira interativa e intuitiva de explorar e entender as árvores de decisão, visualizando a estrutura da árvore e seu processo de tomada de decisão. O código-fonte proporciona um entendimento fácil do funcionamento interno das árvores de decisão.
