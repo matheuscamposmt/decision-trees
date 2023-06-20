@@ -24,8 +24,8 @@ A tabela a seguir resume o processo do algoritmo CART:
 
 | Passo | Descrição |
 |------|-------------|
-| 1.   | Selecionar a melhor característica para dividir os dados com base em um critério específico (impureza de Gini ou soma dos erros quadrados). |
-| 2.   | Particionar os dados com base na característica e limite selecionados. |
+| 1.   | Selecionar o melhor atributo e o melhor limiar para dividir os dados com base na impureza de Gini ou na soma dos erros quadrados. |
+| 2.   | Particionar os dados com base no atributo e limiar selecionados. |
 | 3.   | Repetir os passos 1 e 2 recursivamente para cada subconjunto até que um critério de parada seja atendido. |
 | 4.   | Criar nós de decisão e nós folha com base nas divisões. |
 | 5.   | Atribuir a classe majoritária (classificação) ou o valor médio (regressão) aos nós folha. |
