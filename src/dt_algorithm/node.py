@@ -6,20 +6,21 @@ class Node:
     count=0
     def __init__(self, left, right, feature_idx=None, 
                  threshold=None, feature_name=None, 
-                 gini_value=None, n_sample=None, _class=None, 
+                 criteria_value=None, n_sample=None, _result=None, 
                  class_name=None):
         self.id=Node.count
         Node.count += 1
-
+    
         self.left: Node = left
         self.right: Node = right
-        self.feature_idx = feature_idx
-        self.feature_name = feature_name
-        self.threshold = threshold
-        self.gini= gini_value
-        self.n_sample = n_sample
-        self._class = _class
-        self.class_name = class_name
+
+        self.feature_idx: int = feature_idx
+        self.feature_name: str = feature_name
+        self.threshold: float = threshold
+        self.criteria_value: float = criteria_value
+        self.n_sample: int = n_sample
+        self._class = _result
+        self.class_name: str = class_name
 
     def predict(self, x: np.ndarray) -> float:
         if x[self.feature_idx] < self.threshold:
@@ -33,15 +34,20 @@ class Node:
         
 
 class LeafNode(Node):
-    def __init__(self, data: Iterable, gini=None, _class=None, class_name=None):
+    def __init__(self, data: Iterable, criteria_value=None, _result=None, class_name=None):
         super().__init__(None, None)
         self.data = data
         self.classes = np.unique(data[:, -1])
-        self._class = _class
+        self._class = _result
         self.feature_idx = self._class
-        self.gini = gini
+        self.criteria_value = criteria_value
         self.n_sample=len(data)
         self.class_name=class_name
 
     def predict(self, X=None):
-        return self._class
+        if self._type == 'classification':
+            return self._class
+        
+        elif self._type == 'regression':
+            return np.mean(self.data[:, -1])
+    

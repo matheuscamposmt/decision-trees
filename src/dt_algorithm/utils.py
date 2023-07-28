@@ -9,11 +9,10 @@ def mean_adjacent(arr: np.ndarray, window_size: int = 2) -> np.ndarray:
     
     # Calculate the mean of each subarray of adjacent numbers
     means = np.mean(windowed_view, axis=1)
-    print(means)
     
     return means
 
-def cost_function(l_labels, r_labels, classes):
+def impurity_function(l_labels, r_labels, tree_type='classification') -> float:
     m_left, m_right = len(l_labels), len(r_labels)
     m = m_left + m_right
 
@@ -22,14 +21,27 @@ def cost_function(l_labels, r_labels, classes):
 
     return g_left*(m_left/m) + g_right*(m_right/m)
 
+def loss_function(l_labels, r_labels):
+    m_left, m_right = len(l_labels), len(r_labels)
+    m = m_left + m_right
+
+    s_left = sse(l_labels)
+    s_right = sse(r_labels)
+
+    return s_left*(m_left/m) + s_right*(m_right/m)
+
+def sse(y):
+    return np.sum((y - get_mean(y))**2)
+
+def get_mean(y):
+    return np.mean(y)
+    
+
 def proportion(class_, data):
     m = len(data)
     if len(data) == 0:
         return 0
     return np.count_nonzero(data == class_) / m
-
-def gini(p_classes):
-    return np.sum(p_classes**2)
 
 def proportions(classes, y):
     return np.apply_along_axis(lambda class_: proportion(class_, y), 
@@ -38,10 +50,14 @@ def proportions(classes, y):
 
 def gini_impurity(y):
     if len(y) == 0:
+        print(f"len 0 of {y}")
         return 0
+    
     classes = np.unique(y)
     p_classes = proportions(classes, y)
-    return 1 - gini(p_classes)
+    
+    return 1 - np.sum(p_classes**2)
 
-def get_majority(classes, y):
+def get_majority_class(y):
+    classes = np.unique(y)
     return np.argmax(proportions(classes , y))

@@ -19,16 +19,18 @@ def build_tree(n_clicks):
     if n_clicks == 0:
         return figure
 
-    with open('root.pkl', 'rb') as tree_file:
+    with open('tree.pkl', 'rb') as tree_file:
         tree = pickle.load(tree_file)
+
 
     adj_list = dict()
 
     nodes = []
     levels = []
     hoverdata = []
+    criterion = "Gini Impurity" if tree.tree_type == 'classification' else 'MSE'
     # BFS to generate tree nodes in a list
-    queue = [(tree, 0, 0)]
+    queue = [(tree.root, 0, 0)]
     id_counter = 0
     while queue:
         node, level, node_id = queue.pop(0)
@@ -36,15 +38,19 @@ def build_tree(n_clicks):
         levels.append(level)
 
         hovertext =f"""<span style='color:red'>{node.feature_name} <= {node.threshold}</span>
-        <br><span style='color:green'>Gini Impurity={node.gini:.4f}</span>
-        <br><span style='color:orange'>Class={node.class_name}</span>
-        <br><span style='color:black'>Samples={node.n_sample}</span>"""
+                    <br><span style='color:green'>{criterion}={node.criteria_value:.4f}</span>
+                    <br><span style='color:orange'>Class={node.class_name}</span>
+                    <br><span style='color:black'>Samples={node.n_sample}</span>"""
+        
+        # The reason I'm getting this error: TypeError: unsupported format string passed to NoneType.__format__
+        
 
         if not (node.left or node.right):
-            hovertext = f"""<span style='color:red'>DECISION NODE</span>
-        <br><span style='color:green'>Gini Impurity={node.gini:.4f}</span>
-        <br><span style='color:orange'>Class={node.class_name}</span>
-        <br><span style='color:black'>Samples={node.n_sample}</span>"""
+            hovertext = f"""<span style='color:red'>PREDICTION NODE</span>
+            <br><span style='color:green'>{criterion}={node.criteria_value:.4f}</span>
+            <br><span style='color:orange'>Class={node.class_name}</span>
+            <br><span style='color:black'>Samples={node.n_sample}</span>"""
+        
         hoverdata.append(hovertext)
 
         parent_id = node_id
@@ -87,8 +93,6 @@ def build_tree(n_clicks):
             )
             line_traces.append(line_trace)
 
-
-
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
         x=x_s, y=y_s,
@@ -120,11 +124,36 @@ def predict_tree(n_clicks, actual_figure):
 @callback(
     Output('tree-graph', 'figure'),
     Input('show-button', 'n_clicks'),
-    #Input('predict-button', 'n_clicks'),
+    Input('tree-graph', 'clickData'),
     [State('tree-graph', 'figure')]
 )
-def update_graph(show_clicks, actual_figure):
+def update_graph(show_clicks, clickData, actual_figure):
     triggered_id = ctx.triggered_id
-    #if triggered_id == 'predict-button':
-    #    return predict_tree(predict_clicks, actual_figure)
+
+    if triggered_id == 'show-button':
+        return build_tree(show_clicks)
+    
+    elif triggered_id == 'tree-graph':
+        return update_annotation(clickData, actual_figure)
+
     return build_tree(show_clicks)
+
+
+# create a callback function for the user to click on a node and see more information about it
+
+def update_annotation(click_data, actual_fig):
+
+    if click_data is not None:
+        point = click_data['points'][0]
+        point_index = click_data['points'][0]['pointIndex']
+        annotation = {
+            'x': point['x'],
+            'y': point['y'],  # Adjust the y-coordinate for the annotation position
+            'text': f"Node number {point_index + 1}",
+            'ax': 0,
+            'ay': -40
+        }
+
+        actual_fig['layout']['annotations'] = [annotation]
+        return actual_fig
+    return actual_fig
