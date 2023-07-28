@@ -1,26 +1,46 @@
-from dt_algorithm.utils import mean_adjacent, cost_function, gini_impurity, get_majority
+from .utils import (mean_adjacent, impurity_function, 
+                    gini_impurity, get_majority_class, 
+                    loss_function, sse, get_mean)
 import numpy as np
 from .node import Node, LeafNode
 
 EPSILON = np.finfo('double').eps
 class DecisionTree:
-    def __init__(self, max_depth=None, min_samples_leaf=4, feature_names=[], class_names=[]):
+    def __init__(self, max_depth=None, min_samples_to_split=4, feature_names=[], class_names=[]):
         Node.count = 0
         self.root: Node = Node(None, None)
+        
         self.max_depth = max_depth
-        self.min_samples_leaf = min_samples_leaf
+        self.min_samples_to_split = min_samples_to_split
         self.feature_names = feature_names
+        
         self.classes = []
         self.class_names = class_names
+
+        self.tree_type: str = 'classification'
     
-    def fit(self, X, y):
-        self.classes = np.unique(y)
+    def fit(self, X: np.ndarray, y: np.ndarray):
+
+        # checking the dtype of the labels
+        if y.dtype == np.float64 or y.dtype == np.float32:
+            self.tree_type = 'regression'
         
+        # redundancy for sake of clarity
+        elif y.dtype == np.int64 or y.dtype == np.int32:
+            self.tree_type = 'classification'
+
+        # if not a valid dtype
+        else:
+            raise TypeError("y must be of type np.float64, np.float32, np.int64, or np.int32")
+        
+        # calling the grow method with the data and the feature indices
         self.root = self._grow(np.hstack((X, y)), np.arange(X.shape[-1]))
     
+    # predict a single sample
     def predict(self, X):
         return np.apply_along_axis(self.root.predict, arr=X, axis=1)
     
+    # split the data based on the feature and the threshold
     def _split_data(self, feature_data: np.ndarray, labels: np.ndarray, thresh: float):
         #splitting left
         left_indices = feature_data < thresh
@@ -34,8 +54,10 @@ class DecisionTree:
 
         return (left_feature_data, left_labels), (right_feature_data, right_labels)
     
+    # find the best split for the data based on the cost function for each pair of feature and threshold
     def _best_split(self, feature_data: np.ndarray, labels: np.ndarray, thresholds):
-        split_costs = []
+        min_split_cost = np.inf
+        min_cost_thresh = None
         # for each threshold
         for thresh in thresholds:
             left_data, right_data = self._split_data(feature_data, labels, thresh)
@@ -43,61 +65,73 @@ class DecisionTree:
             left_labels = left_data[1]
             right_labels = right_data[1]
 
+            cost_function = impurity_function
+            if self.tree_type == 'regression':
+                cost_function = loss_function
+
             # calculate the cost for the feature with the specific threshold
-            cost = cost_function(left_labels, right_labels, 
-                                self.classes)
+            cost = cost_function(left_labels, right_labels)
             
-            split_costs.append(cost)
+            if cost < min_split_cost:
+                min_split_cost = cost
+                min_cost_thresh = thresh
         
-        min_idx = np.argmin(split_costs)
-        min_split_cost = split_costs[min_idx]
-        min_thresh = thresholds[min_idx]
-        
-        return min_thresh, min_split_cost
+        return min_cost_thresh, min_split_cost
     
 
     def _best_feature(self, data, feature_idxs):
-        feature_costs = []
-        min_thresholds = []
+
+        min_feature_cost = np.inf
+        min_feature_threshold = None
+        selected_feature = None
         # for each feature in a list of the features index
         for feature_idx in feature_idxs:
 
             # get the feature data
             feature_data = data[:, feature_idx]
             labels = data[:, -1]
-
+            
+            unique_values = np.sort(np.unique(feature_data))
+            
             # generate the thresholds
-            thresholds = mean_adjacent(np.unique(np.sort(feature_data)), window_size=2)
+            thresholds = mean_adjacent(unique_values, window_size=2)
             min_thresh, min_split_cost = self._best_split(feature_data, labels, thresholds)
 
-            feature_costs.append(min_split_cost)
-            min_thresholds.append(min_thresh)
+            if min_split_cost < min_feature_cost:
+                min_feature_cost = min_split_cost
+                min_feature_threshold = min_thresh
+                selected_feature = feature_idx
         
-        min_idx = np.argmin(feature_costs)
-
-        min_feature_cost = feature_costs[min_idx]
-        min_feature_threshold = min_thresholds[min_idx]
-        selected_feature = feature_idxs[min_idx]
 
         return selected_feature, min_feature_threshold, min_feature_cost
         
 
     def _grow(self, data, feature_idxs, depth=1):
-        data_gini_impurity = gini_impurity(data[:, -1])
-        major_class = get_majority(self.classes, data[:, -1])
+        compute_criteria = gini_impurity
+        get_result = get_majority_class
+        if self.tree_type == 'regression':
+            compute_criteria = sse
+            get_result = get_mean
+
+        # Calculate the criteria value of the data
+        y = data[:, -1]
+        criteria_value = compute_criteria(y)
+        result = get_result(y)
+
+        class_name = self.class_names[result] if self.tree_type=='classification' else "NA"
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
             #print(f"Limit depth reached: {depth}. Number of samples: {len(data)}")
-            return LeafNode(data, gini=data_gini_impurity, 
-                            _class = major_class, class_name=self.class_names[major_class])
-        if self.min_samples_leaf and (len(data) < self.min_samples_leaf):
+            return LeafNode(data, criteria_value=criteria_value, 
+                            _result = result, class_name=class_name)
+        if self.min_samples_to_split and (len(data) < self.min_samples_to_split):
             #print(f"Data with {len(data)} samples, returning LeafNode with depth {depth}")
-            return LeafNode(data, gini=data_gini_impurity, 
-                            _class=major_class, class_name=self.class_names[major_class])
-        if data_gini_impurity < EPSILON:
-            return LeafNode(data, gini=data_gini_impurity, 
-                            _class=major_class,class_name=self.class_names[major_class])
+            return LeafNode(data, criteria_value=criteria_value, 
+                            _result=result, class_name=class_name)
+        if criteria_value < EPSILON:
+            return LeafNode(data, criteria_value=criteria_value, 
+                            _result=result,class_name=class_name)
 
         # splitting
         selected_feature, min_feature_threshold, min_feature_cost = self._best_feature(data, feature_idxs)
@@ -110,14 +144,15 @@ class DecisionTree:
         left_node = self._grow(left_data, feature_idxs, depth=depth+1)
         right_node = self._grow(right_data, feature_idxs, depth=depth+1)
 
+
         return Node(left_node, 
                     right_node, 
                     selected_feature, 
                     min_feature_threshold, 
-                    feature_name=self.feature_names[selected_feature] if any(self.feature_names) else None,
-                    gini_value = data_gini_impurity,
-                    n_sample = len(data), _class=major_class,
-                    class_name=self.class_names[major_class])
+                    feature_name=self.feature_names[selected_feature] if any(self.feature_names) else "NA",
+                    criteria_value = criteria_value,
+                    n_sample = len(data), _result=result,
+                    class_name=class_name)
     
     #DFS
     def _traverse(self, node: Node):
