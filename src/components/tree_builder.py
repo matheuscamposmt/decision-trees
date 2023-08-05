@@ -2,23 +2,10 @@ import igraph
 import plotly.graph_objects as go
 import pickle
 from dash import dcc, Input, Output, State, callback, ctx
+from components.fit_interface import load_dataset
 
 
-def build_tree(n_clicks):
-    # Create the plotly figure for the tree
-    figure = go.Figure()
-    figure.update_layout(
-        showlegend=False,
-        xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
-        autosize=True,
-        height=800,
-        width=1100,
-        margin=dict(l=20, r=20, t=30, b=20)
-    )
-    if n_clicks == 0:
-        return figure
-
+def build_tree_viz(figure):
     with open('tree.pkl', 'rb') as tree_file:
         tree = pickle.load(tree_file)
 
@@ -106,11 +93,9 @@ def build_tree(n_clicks):
         )
     )
 
-    figure.add_traces(line_traces + [scatter])
+    return line_traces+[scatter]
 
-    return figure
-
-
+# TODO
 def predict_tree(n_clicks, actual_figure):
     if n_clicks == 0:
         return None
@@ -123,37 +108,46 @@ def predict_tree(n_clicks, actual_figure):
 
 @callback(
     Output('tree-graph', 'figure'),
-    Input('show-button', 'n_clicks'),
-    Input('tree-graph', 'clickData'),
-    [State('tree-graph', 'figure')]
+    Input('show-button', 'n_clicks')
 )
-def update_graph(show_clicks, clickData, actual_figure):
-    triggered_id = ctx.triggered_id
-
-    if triggered_id == 'show-button':
-        return build_tree(show_clicks)
+def update_graph(show_clicks):
+    # Create the plotly figure for the tree
+    figure = go.Figure()
+    figure.update_layout(
+        showlegend=False,
+        xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
+        autosize=True,
+        height=800,
+        width=1100,
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+    if show_clicks == 0:
+        return figure
     
-    elif triggered_id == 'tree-graph':
-        return update_annotation(clickData, actual_figure)
+    graph_objects = build_tree_viz(show_clicks)
+    figure.add_traces(graph_objects)
 
-    return build_tree(show_clicks)
+    return figure
+
 
 
 # create a callback function for the user to click on a node and see more information about it
-
-def update_annotation(click_data, actual_fig):
-
+"""
+@callback(
+        Output('data-table', 'data'),
+        [Input('tree-graph', 'clickData'), Input('data-table', 'data')]
+)
+def update_annotation(click_data, data):
     if click_data is not None:
         point = click_data['points'][0]
-        point_index = click_data['points'][0]['pointIndex']
-        annotation = {
-            'x': point['x'],
-            'y': point['y'],  # Adjust the y-coordinate for the annotation position
-            'text': f"Node number {point_index + 1}",
-            'ax': 0,
-            'ay': -40
-        }
+        point_index = point['pointIndex']
+        
+        print(data)
 
-        actual_fig['layout']['annotations'] = [annotation]
-        return actual_fig
-    return actual_fig
+
+        
+        
+
+    return data
+"""

@@ -1,5 +1,5 @@
 from dash import dcc
-from dash import dcc, Input, Output, State, callback
+from dash import dcc, Input, Output, State, callback, html, dash_table
 import dash_bootstrap_components as dbc
 
 dataset_options = [
@@ -71,18 +71,23 @@ hyperparameters_input = dbc.Form(
         ], align="end"
     ), className='g-2'
 )
-graph_card = dbc.Card(dbc.CardBody([hyperparameters_input, graph]), style={"height": 950, "width": 1200})
 
+display_data = dbc.Row(
+    [
+        dcc.Markdown("""
+            **Data**
 
-"""@callback(
-    Output('tree-graph', 'figure'),
-    
+            Click on points in the graph.
+        """),
+
+        dash_table.DataTable(id='data-table',
+                             style_cell={'textAlign': 'left'},
+                             style_header={'fontWeight': 'bold'},
+                             style_table={'overflowX': 'auto'},
+                             page_size=25)
+    ]
 )
-def show_predict(n_clicks, data_table):
-    if n_clicks == 0:
-        return graph.figure
-    figure_data = graph.figure['data']
 
-    if not any(figure_data):
-        return graph.figure"""
+graph_card = dbc.Card(dbc.CardBody([hyperparameters_input, graph]), style={"height": 950, "width": 1100})
+display_card = dbc.Card(dbc.CardBody(display_data), style={"height": 950, "width": 600})
 

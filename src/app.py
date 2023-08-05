@@ -1,7 +1,7 @@
 import dash
 from dash import dcc, html
 import dash_bootstrap_components as dbc
-from components import graph_card
+from components import graph_card, display_card
 
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.ZEPHYR])
@@ -10,7 +10,7 @@ layout = dbc.Container(
         html.H1("Decision Tree Visualization", className="text-center mt-5 mb-3"),
         html.H4("Explore and understand decision trees with a interactive visualization", className="text-center text-muted"),
         dbc.Row(
-            [graph_card],
+            [graph_card, display_card],
             justify="center",
             className="mt-5"  # Add className instead of class_name
         ),

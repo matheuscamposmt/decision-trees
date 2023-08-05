@@ -171,5 +171,25 @@ class DecisionTree:
 
         return nodes
     
+    #BFS
+    def _traverse_bfs(self, node: Node):
+        if node is None:
+            return []
+
+        queue = [node]
+        nodes = []
+        while queue:
+            current_node = queue.pop(0)
+            nodes.append(current_node)
+            if current_node.left:
+                queue.append(current_node.left)
+            if current_node.right:
+                queue.append(current_node.right)
+        
+        return nodes
+    
     def get_tree_structure(self):
         return self._traverse(self.root)
+    
+    def get_tree_structure_bfs(self):
+        return self._traverse_bfs(self.root)
