@@ -16,18 +16,17 @@ def load_dataset(name: str, as_frame=False):
 
 
 @callback(
-    (Output("fit-button", "disabled"),Output("data-table", "data")),
+    Output("fit-button", "disabled"),
     Input("fit-button", "n_clicks"),
     [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-split-input", "value")],
 )
 def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_to_split: int) -> List[Node]:
     if n_clicks == 0:
-        return False, []
+        return False
 
     # Load the dataset
-    data = load_dataset(dataset_name, as_frame=True)
-    df = data.frame
-    X, y = data.data.to_numpy(), data.target.to_numpy().reshape(-1, 1)
+    data = load_dataset(dataset_name)
+    X, y = data.data, data.target.reshape(-1, 1)
     # Create a decision tree.
     tree = DecisionTree(max_depth=max_depth, min_samples_to_split=min_samples_to_split,
                         feature_names=data.feature_names, class_names=data.target_names)
@@ -42,4 +41,4 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_to_split: 
     #Received value of type <class 'bool'>:
     #    False
 
-    return False, df.to_dict('records')
+    return False

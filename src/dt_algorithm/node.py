@@ -4,7 +4,7 @@ from typing import Iterable
 
 class Node:
     count=0
-    def __init__(self, left, right, feature_idx=None, 
+    def __init__(self, left, right, data=None, feature_idx=None, 
                  threshold=None, feature_name=None, 
                  criteria_value=None, n_sample=None, _result=None, 
                  class_name=None):
@@ -14,6 +14,7 @@ class Node:
         self.left: Node = left
         self.right: Node = right
 
+        self.data = data
         self.feature_idx: int = feature_idx
         self.feature_name: str = feature_name
         self.threshold: float = threshold

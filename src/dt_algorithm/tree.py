@@ -146,7 +146,8 @@ class DecisionTree:
 
 
         return Node(left_node, 
-                    right_node, 
+                    right_node,
+                    data, 
                     selected_feature, 
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else "NA",
