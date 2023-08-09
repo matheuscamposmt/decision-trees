@@ -1,8 +1,8 @@
-# Árvore de Decisão do Zero usando Python e NumPy
+# Árvores de Decisão do Zero usando Python e NumPy com visualização interativa
 
 ![Ilustração da Árvore de Decisão](https://www.xoriant.com/cdn/ff/weqpbrtpXGjLpVQ_X-gWqsFlvjAxpv5Wv3xNW0A4vuQ/1602007254/public/2020-10/a-decisionTreesforClassification-AMachineLearningAlgorithm.jpg)
 
-Este repositório contém uma implementação do algoritmo de Árvore de Decisão do zero usando o algoritmo CART (Árvores de Classificação e Regressão). A árvore de decisão é um algoritmo poderoso amplamente utilizado para construir modelos capazes de lidar tanto com tarefas de classificação quanto de regressão. Essa implementação é escrita em Python e utiliza a biblioteca NumPy para cálculos numéricos eficientes.
+Este repositório contém uma implementação do algoritmo de Árvore de Decisão do zero usando o algoritmo CART (Árvores de Classificação e Regressão). A árvore de decisão é um algoritmo poderoso amplamente utilizado para construir modelos capazes de lidar tanto com tarefas de classificação quanto de regressão. Essa implementação é escrita em Python e utiliza a biblioteca NumPy para cálculos numéricos eficientes. Além disso possui um suporte para uma visualização de árvores de decisão de modo interativo para fins educacionais.
 
 ## Visão geral do algoritmo de Árvore de Decisão
 
