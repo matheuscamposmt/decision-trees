@@ -16,6 +16,7 @@ def build_tree_viz(figure):
     levels = []
     hoverdata = []
     criterion = "Gini Impurity" if tree.tree_type == 'classification' else 'MSE'
+    result_type = "Class" if tree.tree_type == 'classification' else "Value"
     # BFS to generate tree nodes in a list
     queue = [(tree.root, 0, 0)]
     id_counter = 0
@@ -24,9 +25,9 @@ def build_tree_viz(figure):
         nodes.append(node)
         levels.append(level)
 
-        hovertext =f"""<span style='color:red'>{node.feature_name} <= {node.threshold}</span>
+        hovertext =f"""<span style='color:red'>Condition: {node.feature_name} <= {node.threshold}</span>
                     <br><span style='color:green'>{criterion}={node.criteria_value:.4f}</span>
-                    <br><span style='color:orange'>Class={node.class_name}</span>
+                    <br><span style='color:blue'>{result_type}={node.class_name}</span>
                     <br><span style='color:black'>Samples={node.n_sample}</span>"""
         
         # The reason I'm getting this error: TypeError: unsupported format string passed to NoneType.__format__
@@ -35,7 +36,7 @@ def build_tree_viz(figure):
         if not (node.left or node.right):
             hovertext = f"""<span style='color:red'>PREDICTION NODE</span>
             <br><span style='color:green'>{criterion}={node.criteria_value:.4f}</span>
-            <br><span style='color:orange'>Class={node.class_name}</span>
+            <br><span style='color:blue;font-weight:bold'>{result_type}={node.class_name}</span>
             <br><span style='color:black'>Samples={node.n_sample}</span>"""
         
         hoverdata.append(hovertext)
@@ -69,73 +70,116 @@ def build_tree_viz(figure):
     y_s = [max_level - coord[1] for coord in coords]
 
     line_traces = []
+    annotations = []
     for node_i, node_connections in adj_list.items():
         for conn in node_connections:
             line_trace = go.Scatter(
                 x=[x_s[node_i], x_s[conn]],
                 y=[y_s[node_i], y_s[conn]],
-                mode='lines+text',
-                line=dict(color='black'),
-                text="True" if x_s[node_i] > x_s[conn] else "False"
+                mode='lines',
+                line=dict(color='black')
             )
             line_traces.append(line_trace)
 
+            # add annotation
+            x0 = x_s[node_i]
+            x1 = x_s[conn]
+            y0 = y_s[node_i]
+            y1 = y_s[conn]
+            x = (x0 + x1) / 2
+            y = (y0 + y1) / 2
+            annotations.append(
+                dict(
+                    x=x,
+                    y=y,
+                    xref="x",
+                    yref="y",
+                    text='False' if x0 < x1 else 'True',
+                    showarrow=False,
+                    font=dict(
+                        family="Courier New, monospace",
+                        size=16,
+                        color="#ffffff"
+                    ),
+                    align="center",
+                    arrowhead=2,
+                    arrowsize=1,
+                    arrowwidth=2,
+                    arrowcolor="#636363",
+                    ax=0,
+                    ay=-30,
+                    bordercolor="#c7c7c7",
+                    borderwidth=2,
+                    borderpad=4,
+                    bgcolor="#ff7f0e",
+                    opacity=0.9
+                )
+            )
+        
     # Create scatter trace for the tree nodes
     scatter = go.Scatter(
         x=x_s, y=y_s,
         mode='markers',
+        fillcolor='#05004a',  # dark blue
+        line=dict(color='white', width=2),
         marker=dict(size=40, color='#1f77b4'),
         hoverinfo='text',
         text=hoverdata,
         hovertemplate="%{text}<extra></extra>",
+        # improve the hover aesthetics
         hoverlabel=dict(
-            bgcolor="white"
-        )
+            bgcolor="white",
+            font_size=16,
+            font_family="Rockwell"
+        ),
+        showlegend=False
+
     )
 
-    return line_traces+[scatter]
+
+    return line_traces+[scatter], annotations
 
 # TODO
 def predict_tree(n_clicks, actual_figure):
-    if n_clicks == 0:
-        return None
-    
-    traces = actual_figure['data']
-    traces.append(go.Scatter(x=[1], y=[1], mode='markers'))
-
-    return {'data':traces, 'layout': actual_figure['layout']}
+    pass
 
 
 @callback(
     Output('tree-graph', 'figure'),
-    Input('show-button', 'n_clicks')
+    [Input('show-button', 'n_clicks'), Input('tree-graph', 'clickData'), Input('tree-graph', 'figure')]
 )
-def update_graph(show_clicks):
-    # Create the plotly figure for the tree
-    figure = go.Figure()
-    figure.update_layout(
-        showlegend=False,
-        xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
-        autosize=True,
-        height=800,
-        width=1100,
-        margin=dict(l=20, r=20, t=30, b=20)
-    )
-    if show_clicks == 0:
-        return figure
-    
-    graph_objects = build_tree_viz(show_clicks)
-    figure.add_traces(graph_objects)
+def update_graph(show_clicks, click_data, figure):
+    ctx = callback_context
+    input_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if not figure:
+        figure = go.Figure()
+        figure.update_layout(
+            showlegend=False,
+            xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
+            autosize=True,
+            height=800,
+            width=1100,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
+        if show_clicks == 0:
+            return figure
+    if input_id == 'show-button':
+        print('building tree viz...')
+        graph_objects, annotations = build_tree_viz(show_clicks)
+        figure['data'] = graph_objects
+        figure['layout']['annotations'] =annotations
+
+    # highlight the node clicked on
+    elif input_id == 'tree-graph':
+        point = click_data['points'][0]
+        curves = figure['data']
 
     return figure
 
 
 
 # create a callback function for the user to click on a node and see more information about it
-
-
-
 @callback(
         Output('data-table', 'data'),
         [Input('show-button', 'n_clicks'),Input('tree-graph', 'clickData'), Input('data-table', 'data')],
@@ -159,13 +203,7 @@ def update_datatable(show_clicks, click_data, data, dataset_name):
             return update_annotation(click_data, data)
     if click_data:
         return update_annotation(click_data, data)
-
-
-
-
-        
-        
-
+    
     return data
 
 
@@ -180,7 +218,5 @@ def update_annotation(click_data, data):
     node = nodes[point_index]
 
     subdata = node.data
-
-    # numpy array to dict records
-    df = pd.DataFrame(subdata, columns=list(data[0].keys()))
-    return df.to_dict('records')
+    subdf = pd.DataFrame(subdata, columns=list(data[0].keys()))
+    return subdf.to_dict('records')

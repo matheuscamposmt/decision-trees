@@ -12,7 +12,7 @@ def mean_adjacent(arr: np.ndarray, window_size: int = 2) -> np.ndarray:
     
     return means
 
-def impurity_function(l_labels, r_labels, tree_type='classification') -> float:
+def impurity_function(l_labels, r_labels) -> float:
     m_left, m_right = len(l_labels), len(r_labels)
     m = m_left + m_right
 
@@ -30,27 +30,25 @@ def loss_function(l_labels, r_labels):
 
     return s_left*(m_left/m) + s_right*(m_right/m)
 
-def sse(y):
+def sse(y) -> float:
     return np.sum((y - get_mean(y))**2)
 
-def get_mean(y):
+def get_mean(y) -> float:
     return np.mean(y)
-    
 
-def proportion(class_, data):
+def proportion(class_, data) -> float:
     m = len(data)
     if len(data) == 0:
         return 0
     return np.count_nonzero(data == class_) / m
 
 def proportions(classes, y):
-    return np.apply_along_axis(lambda class_: proportion(class_, y), 
-                                    arr=classes.reshape(-1, 1), 
-                                    axis=1)
+        return np.apply_along_axis(lambda class_: proportion(class_, y), 
+                                        arr=classes.reshape(-1, 1), 
+                                        axis=1)
 
-def gini_impurity(y):
+def gini_impurity(y: np.ndarray) -> float:
     if len(y) == 0:
-        print(f"len 0 of {y}")
         return 0
     
     classes = np.unique(y)
@@ -58,6 +56,6 @@ def gini_impurity(y):
     
     return 1 - np.sum(p_classes**2)
 
-def get_majority_class(y):
-    classes = np.unique(y)
-    return np.argmax(proportions(classes , y))
+def get_majority_class(y: np.ndarray) -> int:
+    classes = np.unique(y).astype(np.int64)
+    return classes[np.argmax(proportions(classes, y))]

@@ -118,7 +118,7 @@ class DecisionTree:
         criteria_value = compute_criteria(y)
         result = get_result(y)
 
-        class_name = self.class_names[result] if self.tree_type=='classification' else "NA"
+        class_name = self.class_names[result] if self.tree_type=='classification' else result
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
@@ -143,7 +143,6 @@ class DecisionTree:
         # Create child nodes
         left_node = self._grow(left_data, feature_idxs, depth=depth+1)
         right_node = self._grow(right_data, feature_idxs, depth=depth+1)
-
 
         return Node(left_node, 
                     right_node,
