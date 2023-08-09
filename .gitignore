@@ -1,5 +1,5 @@
 # Custom
-root.pkl
+*.pkl
 testes.py
 
 # Byte-compiled / optimized / DLL files
