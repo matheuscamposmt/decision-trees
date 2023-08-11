@@ -32,7 +32,7 @@ class DecisionTree:
             raise TypeError("y must be of type np.float64, np.float32, np.int64, or np.int32")
         
         # calling the grow method with the data and the feature indices
-        self.root = self._grow(np.hstack((X, y)), np.arange(X.shape[-1]))
+        self.root = self._grow(np.hstack((X, y)))
     
     # predict a single sample
     def predict(self, X):
@@ -104,7 +104,7 @@ class DecisionTree:
         return selected_feature, min_feature_threshold, min_feature_criterion
         
 
-    def _grow(self, data, feature_idxs, depth=1):
+    def _grow(self, data, depth=1):
         compute_criterion = gini_impurity
         get_result = get_majority_class
         if self.tree_type == 'regression':
@@ -128,17 +128,19 @@ class DecisionTree:
         if criterion_value < EPSILON:
             return LeafNode(data, criterion_value=criterion_value, 
                             _result=result,class_name=class_name)
+        
+        feature_idxs = np.arange(data.shape[-1] - 1)
 
         # splitting
-        selected_feature, min_feature_threshold, min_feature_criterion = self._best_feature(data, feature_idxs)
+        selected_feature, min_feature_threshold, _ = self._best_feature(data, feature_idxs)
         
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
         right_data = data[data[:, selected_feature] >= min_feature_threshold]
 
         # Create child nodes
-        left_node = self._grow(left_data, feature_idxs, depth=depth+1)
-        right_node = self._grow(right_data, feature_idxs, depth=depth+1)
+        left_node = self._grow(left_data, depth=depth+1)
+        right_node = self._grow(right_data, depth=depth+1)
 
         return Node(left_node, 
                     right_node,

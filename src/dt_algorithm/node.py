@@ -28,7 +28,8 @@ class Node:
 
 class LeafNode(Node):
     def __init__(self, data, criterion_value, _result, class_name):
-        super().__init__(None, None, data=data, criterion_value=criterion_value, 
+        super().__init__(None, None, data=data, 
+                         criterion_value=criterion_value, 
                          _result=_result, class_name=class_name)
 
     def predict(self, X=None):
