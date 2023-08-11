@@ -26,7 +26,7 @@ def build_tree_viz(figure):
         levels.append(level)
 
         hovertext =f"""<span style='color:red'>Condition: {node.feature_name} <= {node.threshold}</span>
-                    <br><span style='color:green'>{criterion}={node.criteria_value:.4f}</span>
+                    <br><span style='color:green'>{criterion}={node.criterion_value:.4f}</span>
                     <br><span style='color:blue'>{result_type}={node.class_name}</span>
                     <br><span style='color:black'>Samples={node.n_sample}</span>"""
         
@@ -35,7 +35,7 @@ def build_tree_viz(figure):
 
         if not (node.left or node.right):
             hovertext = f"""<span style='color:red'>PREDICTION NODE</span>
-            <br><span style='color:green'>{criterion}={node.criteria_value:.4f}</span>
+            <br><span style='color:green'>{criterion}={node.criterion_value:.4f}</span>
             <br><span style='color:blue;font-weight:bold'>{result_type}={node.class_name}</span>
             <br><span style='color:black'>Samples={node.n_sample}</span>"""
         

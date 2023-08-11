@@ -35,10 +35,5 @@ def fit_tree(n_clicks, dataset_name: str, max_depth: int, min_samples_to_split: 
     filename = "tree.pkl"
     with open(filename, 'wb') as tree_file:
         pickle.dump(tree, tree_file)
-    # error: dash._grouping.SchemaTypeValidationError: Schema: [<Output `fit-button.disabled`>, <Output `data-table.data`>]
-    #Path: ()
-    #Expected type: (<class 'tuple'>, <class 'list'>)
-    #Received value of type <class 'bool'>:
-    #    False
 
     return False

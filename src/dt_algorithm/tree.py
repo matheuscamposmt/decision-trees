@@ -1,7 +1,7 @@
 from .utils import (mean_adjacent, impurity_function, 
                     gini_impurity, get_majority_class, 
                     loss_function, sse, get_mean)
-import numpy as np
+import numpy as np 
 from .node import Node, LeafNode
 
 EPSILON = np.finfo('double').eps
@@ -147,16 +147,12 @@ class DecisionTree:
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else "NA",
                     criterion_value = criterion_value,
-                    n_sample = len(data), _result=result,
-                    class_name=class_name)
+                    _result=result, class_name=class_name)
     
     # DFS traversal
     def _traverse_dfs(self, node: Node):
         if node is None:
             return []
-
-        # Process the current node
-        # ... do something with the node ...
 
         # Recursively traverse the left and right subtrees
         left_nodes = self._traverse_dfs(node.left)
