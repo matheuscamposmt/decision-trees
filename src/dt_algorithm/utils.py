@@ -59,3 +59,17 @@ def gini_impurity(y: np.ndarray) -> float:
 def get_majority_class(y: np.ndarray) -> int:
     classes = np.unique(y).astype(np.int64)
     return classes[np.argmax(proportions(classes, y))]
+
+# function to check if there is not any wrong dtypes or missing values
+def check_data_validity(X):
+    #checking if exists non-valid dtypes
+    if not (np.issubdtype(X.dtype, np.float64) or np.issubdtype(X.dtype, np.float32) or np.issubdtype(X.dtype, np.int64) or np.issubdtype(X.dtype, np.int32)):
+        raise TypeError("X must be of type np.float64, np.float32, np.int64, or np.int32")
+    
+    #checking if exists missing values
+    if np.isnan(X).any():
+        raise ValueError("X must not contain missing values")
+    
+    #checking if exists infinite values
+    if np.isinf(X).any():
+        raise ValueError("X must not contain infinite values")

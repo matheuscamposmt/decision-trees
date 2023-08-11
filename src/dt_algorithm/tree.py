@@ -1,42 +1,32 @@
 from .utils import (mean_adjacent, impurity_function, 
                     gini_impurity, get_majority_class, 
-                    loss_function, sse, get_mean)
+                    loss_function, sse, get_mean, check_data_validity)
 import numpy as np 
 from .node import Node, LeafNode
 
 EPSILON = np.finfo('double').eps
 class DecisionTree:
     def __init__(self, max_depth=5, min_samples_to_split=4, 
-                 feature_names=[], class_names=[]):
+                 feature_names=[], class_names=[], tree_type='classification'):
         self.root: Node = Node(None, None)
         
         self.max_depth = max_depth
         self.min_samples_to_split = min_samples_to_split
         self.feature_names = feature_names
         
-        self.tree_type: str = 'classification'
+        self.tree_type: str = tree_type
         self.class_names = class_names
     
     def fit(self, X: np.ndarray, y: np.ndarray):
-
-        # checking the dtype of the labels
-        if y.dtype == np.float64 or y.dtype == np.float32:
-            self.tree_type = 'regression'
-        
-        # redundancy for the sake of clarity
-        elif y.dtype == np.int64 or y.dtype == np.int32:
-            self.tree_type = 'classification'
-
-        # if not a valid dtype
-        else:
-            raise TypeError("y must be of type np.float64, np.float32, np.int64, or np.int32")
+        # checking if the data is valid
+        check_data_validity(X)
         
         # calling the grow method with the data and the feature indices
         self.root = self._grow(np.hstack((X, y)))
     
     # predict a single sample
     def predict(self, X):
-        return np.apply_along_axis(self.root.predict, arr=X, axis=1)
+        return self.root.predict(X)
     
     # split the data based on the feature and the threshold
     def _split_data(self, feature_data: np.ndarray, labels: np.ndarray, thresh: float):
@@ -111,8 +101,8 @@ class DecisionTree:
             compute_criterion = sse
             get_result = get_mean
 
-        # Calculate the criterion value of the data
         y = data[:, -1]
+        # Calculate the criterion value of the data
         criterion_value = compute_criterion(y)
         result = get_result(y)
 
