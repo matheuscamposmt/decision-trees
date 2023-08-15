@@ -6,7 +6,7 @@ from components.fit_interface import load_dataset
 import pandas as pd
 
 
-def build_tree_viz(figure):
+def build_tree_viz():
     with open('tree.pkl', 'rb') as tree_file:
         tree = pickle.load(tree_file)
 
@@ -164,14 +164,9 @@ def update_graph(show_clicks, click_data, figure):
             return figure
     if input_id == 'show-button':
         print('building tree viz...')
-        graph_objects, annotations = build_tree_viz(show_clicks)
+        graph_objects, annotations = build_tree_viz()
         figure['data'] = graph_objects
         figure['layout']['annotations'] =annotations
-
-    # highlight the node clicked on
-    elif input_id == 'tree-graph':
-        point = click_data['points'][0]
-        curves = figure['data']
 
     return figure
 
@@ -198,14 +193,14 @@ def update_datatable(show_clicks, click_data, data, dataset_name):
         if click_data is None:
             return data
         else:
-            return update_annotation(click_data, data)
+            return update_data(click_data, data)
     if click_data:
-        return update_annotation(click_data, data)
+        return update_data(click_data, data)
     
     return data
 
 
-def update_annotation(click_data, data):
+def update_data(click_data, data):
 
     point = click_data['points'][0]
     point_index = point['pointIndex']
