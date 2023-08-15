@@ -19,25 +19,21 @@ dataset_dropdown = dcc.Dropdown(
 fit_button = dbc.Button("Fit", id="fit-button", 
                         color="primary", className="mr-3", 
                         n_clicks=0)
-show_button = dbc.Button("Show", id="show-button", 
-                         color="secondary", className="btn btn-outline-primary", 
-                         n_clicks=0, disabled=True)
+show_button = dcc.Loading(
+    id="show-button-loading",
+    type="circle",
+    children=[
+        dbc.Button("Show", id="show-button", 
+                   color="secondary", className="btn btn-outline-primary", 
+                   n_clicks=0, disabled=True)
+    ]
+)
 predict_button = dbc.Button("Predict", id="predict-button",
                             color="secondary", className="btn btn-outline-primary",
                             n_clicks=0, disabled=True)
 
-@callback(
-    Output('show-button', 'disabled'),
-    [Input('fit-button', 'n_clicks')]
-)
-def enable_button_1(n_clicks_fit):
-    if n_clicks_fit > 0:
-        return False
-    else:
-        return True
-
-
 graph = dcc.Graph(id='tree-graph', config=dict(watermark=False))
+
 max_depth_input = dbc.Input(
     type='number',
     id='max-depth-input',
@@ -75,8 +71,7 @@ hyperparameters_input = dbc.Form(
 display_data = dbc.Row(
     [
         dcc.Markdown("""
-            **Data**
-
+            #### Data
             Click on points in the graph.
         """),
 

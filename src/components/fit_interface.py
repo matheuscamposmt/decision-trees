@@ -13,7 +13,7 @@ def load_dataset(name: str, as_frame=False):
 
 
 @callback(
-    Output("fit-button", "disabled"),
+    Output("show-button", "disabled"),
     Input("fit-button", "n_clicks"),
     [State("dataset-dropdown", "value"), State("max-depth-input", "value"), State("min-samples-split-input", "value")],
 )

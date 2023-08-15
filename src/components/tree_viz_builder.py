@@ -30,9 +30,6 @@ def build_tree_viz(figure):
                         <br><span style='color:blue'>{result_type}={node.class_name}</span>
                         <br><span style='color:black'>Samples={node.n_sample}</span>"""
         
-        # The reason I'm getting this error: TypeError: unsupported format string passed to NoneType.__format__
-        
-
         elif not (node.left or node.right):
             hovertext = f"""<span style='color:red'>PREDICTION NODE</span>
             <br><span style='color:green'>{criterion}={node.criterion_value:.4f}</span>
@@ -156,11 +153,12 @@ def update_graph(show_clicks, click_data, figure):
         figure.update_layout(
             showlegend=False,
             xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': True},
+            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
             autosize=True,
             height=800,
             width=1100,
-            margin=dict(l=20, r=20, t=30, b=20)
+            margin=dict(l=10, r=80, t=30, b=20),
+            plot_bgcolor='white'
         )
         if show_clicks == 0:
             return figure
