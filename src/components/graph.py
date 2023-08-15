@@ -4,8 +4,8 @@ import dash_bootstrap_components as dbc
 
 dataset_options = [
     {'label': "Iris", 'value': "iris"},
-#    {'label': "Wine", 'value': "wine"},
-#    {'label': "Breast Cancer", 'value': "breast_cancer"}
+    {'label': "Wine", 'value': "wine"},
+    {'label': "Diabetes", 'value': "diabetes"}
 ]
 
 dataset_dropdown = dcc.Dropdown(

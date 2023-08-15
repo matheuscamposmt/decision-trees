@@ -24,16 +24,16 @@ def build_tree_viz(figure):
         node, level, node_id = queue.pop(0)
         nodes.append(node)
         levels.append(level)
-
-        hovertext =f"""<span style='color:red'>Condition: {node.feature_name} <= {node.threshold}</span>
-                    <br><span style='color:green'>{criterion}={node.criterion_value:.4f}</span>
-                    <br><span style='color:blue'>{result_type}={node.class_name}</span>
-                    <br><span style='color:black'>Samples={node.n_sample}</span>"""
+        if node.left or node.right:
+            hovertext =f"""<span style='color:red'>Condition: {node.feature_name} <= {node.threshold:.4f}</span>
+                        <br><span style='color:green'>{criterion}={node.criterion_value:.4f}</span>
+                        <br><span style='color:blue'>{result_type}={node.class_name}</span>
+                        <br><span style='color:black'>Samples={node.n_sample}</span>"""
         
         # The reason I'm getting this error: TypeError: unsupported format string passed to NoneType.__format__
         
 
-        if not (node.left or node.right):
+        elif not (node.left or node.right):
             hovertext = f"""<span style='color:red'>PREDICTION NODE</span>
             <br><span style='color:green'>{criterion}={node.criterion_value:.4f}</span>
             <br><span style='color:blue;font-weight:bold'>{result_type}={node.class_name}</span>
@@ -192,7 +192,7 @@ def update_datatable(show_clicks, click_data, data, dataset_name):
         if show_clicks == 0:
             return data
         else:
-            data = load_dataset(dataset_name, as_frame=True)
+            data, _ = load_dataset(dataset_name, as_frame=True)
             df = data.frame
             return df.to_dict('records')
         

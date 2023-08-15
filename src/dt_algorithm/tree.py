@@ -4,7 +4,7 @@ from .utils import (mean_adjacent, impurity_function,
 import numpy as np 
 from .node import Node, LeafNode
 
-EPSILON = np.finfo('double').eps
+EPSILON = np.finfo('float32').eps
 class DecisionTree:
     def __init__(self, max_depth=5, min_samples_to_split=4, 
                  feature_names=[], class_names=[], tree_type='classification'):
@@ -106,7 +106,7 @@ class DecisionTree:
         criterion_value = compute_criterion(y)
         result = get_result(y)
 
-        class_name = self.class_names[result] if self.tree_type=='classification' else result
+        class_name = self.class_names[result] if self.tree_type=='classification' else f"{result:.4f}"
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
