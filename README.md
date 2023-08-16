@@ -1,7 +1,7 @@
 # Árvores de Decisão do Zero usando Python e NumPy com visualização interativa
 
-![Ilustração da Árvore de Decisão](https://www.xoriant.com/cdn/ff/weqpbrtpXGjLpVQ_X-gWqsFlvjAxpv5Wv3xNW0A4vuQ/1602007254/public/2020-10/a-decisionTreesforClassification-AMachineLearningAlgorithm.jpg)
-
+![ezgif com-crop](https://github.com/matheuscamposmt/decision-trees/assets/69912320/424384d4-a243-48f4-91ec-07bb7c3786f8)
+---------------
 Este repositório contém uma implementação do algoritmo de Árvore de Decisão do zero usando o algoritmo CART (Árvores de Classificação e Regressão). A árvore de decisão é um algoritmo poderoso amplamente utilizado para construir modelos capazes de lidar tanto com tarefas de classificação quanto de regressão. Essa implementação é escrita em Python e utiliza a biblioteca NumPy para cálculos numéricos eficientes. Além disso possui um suporte para uma visualização de árvores de decisão de modo interativo para fins educacionais.
 
 ## Visão geral do algoritmo de Árvore de Decisão
@@ -52,14 +52,16 @@ O Aplicativo Web de Visualização da Árvore de Decisão fornece uma interface 
 
 ### Recursos do Aplicativo Web
 
-- Seleção do Conjunto de Dados: Os usuários podem escolher em um menu suspenso o conjunto de dados que desejam usar para treinar a árvore de decisão. Os conjuntos de dados atualmente disponíveis incluem Iris, Wine e conjuntos de dados de câncer de mama.
+- Seleção do Conjunto de Dados: Os usuários podem escolher em um menu suspenso o conjunto de dados que desejam usar para treinar a árvore de decisão. Os conjuntos de dados atualmente disponíveis incluem Iris, Wine e Diabetes. Ainda não é possível fazer upload de um _dataset_ específico.
 - Controles de Hiperparâmetros: Os usuários podem ajustar a profundidade máxima e o número mínimo de amostras necessárias para criar um nó folha usando campos de entrada.
 - Botão "Fit": Ao clicar no botão "Fit", a árvore de decisão é treinada usando o conjunto de dados e hiperparâmetros selecionados.
 - Botão "Show": Uma visualização interativa da árvore de decisão é gerada.
-- Visualização da Árvore de Decisão: O aplicativo web exibe a árvore de decisão como um gráfico, onde cada nó representa um ponto de decisão e cada aresta representa uma divisão com base em uma característica e limite específicos. Os usuários podem passar o mouse sobre os nós para visualizar informações adicionais, como o nome da característica, valor limite, impureza de Gini e número de amostras.
+- Visualização da Árvore de Decisão: O aplicativo web exibe a árvore de decisão como um gráfico, onde cada nó representa um ponto de decisão e cada aresta representa uma divisão com base em uma característica e limite específicos. Os usuários podem passar o mouse sobre os nós para visualizar informações adicionais, como o nome da característica, valor limite, valor do critério utilizado, número de observações. Além disso o usuário pode clicar nos nós da árvore e visualizar o subconjunto de dados correspondente.
 
 O aplicativo web é construído usando o framework Dash e incorpora componentes Bootstrap para estilização. A visualização da árvore de decisão é gerada usando objetos de gráficos do Plotly. A classe DecisionTree e classes relacionadas da implementação anterior são utilizadas para treinar a árvore de decisão e extrair as informações necessárias para a visualização.
 
 ## Conclusão
 
 Essa implementação apresenta as Árvores de Decisão construídas do zero com o algoritmo CART. Ela fornece uma maneira interativa e intuitiva de explorar e entender as árvores de decisão, visualizando a estrutura da árvore e seu processo de tomada de decisão. O código-fonte proporciona um entendimento fácil do funcionamento interno das árvores de decisão.
+
+Uma explicação mais detalhada da implementação do algoritmo pode ser encontrada no meu artigo do Medium referente a esse projeto.
