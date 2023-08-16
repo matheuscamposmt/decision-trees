@@ -29,7 +29,7 @@ class DecisionTree:
         return self.root.predict(X)
     
     # split the data based on the feature and the threshold
-    def _split_data(self, feature_data: np.ndarray, labels: np.ndarray, thresh: float):
+    def _split_data(self, feature_data, labels, thresh: float):
         #splitting left
         left_indices = feature_data < thresh
         left_feature_data = feature_data[left_indices]
@@ -43,7 +43,7 @@ class DecisionTree:
         return (left_feature_data, left_labels), (right_feature_data, right_labels)
     
     # find the best split for the data based on the partitioning criterion for each pair of feature and threshold
-    def _best_split(self, feature_data: np.ndarray, labels: np.ndarray, thresholds):
+    def _best_split(self, feature_data, labels, thresholds):
         min_split_cost = np.inf
         min_cost_thresh = None
         # for each threshold
