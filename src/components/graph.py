@@ -39,22 +39,38 @@ max_depth_input = dbc.Input(
     id='max-depth-input',
     value=5
     )
-min_samples_leaf_input = dbc.Input(
+min_samples_split_input = dbc.Input(
     type='number',
     id='min-samples-split-input',
     value=4
+)
+
+min_samples_leaf_input = dbc.Input(
+    type='number',
+    id='min-samples-leaf-input',
+    value=2
 )
 hyperparameters_input = dbc.Form(
     dbc.Row(
         [
             dbc.Col(
-                [dbc.Label("Maximum levels", html_for='max-depth-slider', className="mr-2"),
+                [dbc.Label(
+                "Maximum levels", 
+                html_for='max-depth-input', 
+                className="mr-2"),
                 max_depth_input]
             ),
             dbc.Col(
                 [dbc.Label(
                 "Minimum samples for a node to split",
-                html_for='min-samples-split-slider',
+                html_for='min-samples-split-input',
+                className="mr-2"),
+                min_samples_split_input]
+            ),
+            dbc.Col(
+                [dbc.Label(
+                "Minimum samples for a leaf node",
+                html_for='min-samples-leaf-input',
                 className="mr-2"),
                 min_samples_leaf_input]
             ),

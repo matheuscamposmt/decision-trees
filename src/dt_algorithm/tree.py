@@ -6,15 +6,17 @@ from .node import Node, LeafNode
 
 EPSILON = np.finfo('float32').eps
 class DecisionTree:
-    def __init__(self, max_depth=5, min_samples_to_split=4, 
+    def __init__(self, max_depth=5, min_samples_to_split=4, min_samples_leaf=2,
                  feature_names=[], class_names=[], tree_type='classification'):
         self.root: Node = Node(None, None)
+        self.tree_type: str = tree_type
         
+        # hyperparameters
         self.max_depth = max_depth
         self.min_samples_to_split = min_samples_to_split
+        self.min_samples_leaf = min_samples_leaf
+
         self.feature_names = feature_names
-        
-        self.tree_type: str = tree_type
         self.class_names = class_names
     
     def fit(self, X: np.ndarray, y: np.ndarray):
@@ -112,9 +114,10 @@ class DecisionTree:
         if self.max_depth and depth >= self.max_depth:
             return LeafNode(data, criterion_value=criterion_value, 
                             _result = result, class_name=class_name)
-        if self.min_samples_to_split and (len(data) < self.min_samples_to_split):
+        if len(data) < self.min_samples_to_split:
             return LeafNode(data, criterion_value=criterion_value, 
                             _result=result, class_name=class_name)
+        
         if criterion_value < EPSILON:
             return LeafNode(data, criterion_value=criterion_value, 
                             _result=result,class_name=class_name)
@@ -127,6 +130,12 @@ class DecisionTree:
         # Split data based on best split
         left_data = data[data[:, selected_feature] < min_feature_threshold]
         right_data = data[data[:, selected_feature] >= min_feature_threshold]
+
+        # Stopping criteria
+        if (len(left_data) < self.min_samples_leaf 
+            or len(right_data) < self.min_samples_leaf):
+            return LeafNode(data, criterion_value=criterion_value, 
+                            _result=result, class_name=class_name)
 
         # Create child nodes
         left_node = self._grow(left_data, depth=depth+1)
