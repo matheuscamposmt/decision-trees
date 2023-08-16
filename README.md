@@ -53,10 +53,10 @@ O Aplicativo Web de Visualização da Árvore de Decisão fornece uma interface 
 ### Recursos do Aplicativo Web
 
 - Seleção do Conjunto de Dados: Os usuários podem escolher em um menu suspenso o conjunto de dados que desejam usar para treinar a árvore de decisão. Os conjuntos de dados atualmente disponíveis incluem Iris, Wine e Diabetes. Ainda não é possível fazer upload de um _dataset_ específico.
-- Controles de Hiperparâmetros: Os usuários podem ajustar a profundidade máxima e o número mínimo de amostras necessárias para criar um nó folha usando campos de entrada.
+- Controles de Hiperparâmetros: Os usuários podem ajustar a profundidade máxima, o número mínimo de amostras necessárias para dividir um nó interno e o número mínimo de amostras para a criação de nós folhas.
 - Botão "Fit": Ao clicar no botão "Fit", a árvore de decisão é treinada usando o conjunto de dados e hiperparâmetros selecionados.
 - Botão "Show": Uma visualização interativa da árvore de decisão é gerada.
-- Visualização da Árvore de Decisão: O aplicativo web exibe a árvore de decisão como um gráfico, onde cada nó representa um ponto de decisão e cada aresta representa uma divisão com base em uma característica e limite específicos. Os usuários podem passar o mouse sobre os nós para visualizar informações adicionais, como o nome da característica, valor limite, valor do critério utilizado, número de observações. Além disso o usuário pode clicar nos nós da árvore e visualizar o subconjunto de dados correspondente.
+- Visualização da Árvore de Decisão: O aplicativo web exibe a árvore de decisão como um gráfico, onde cada nó representa um ponto de decisão e cada aresta representa uma divisão com base em uma característica e limite específicos. Os usuários podem passar o mouse sobre os nós para visualizar informações adicionais, como o nome da característica, valor do limiar, valor do critério utilizado, número de observações. Além disso o usuário pode clicar nos nós da árvore e visualizar o subconjunto de dados correspondente.
 
 O aplicativo web é construído usando o framework Dash e incorpora componentes Bootstrap para estilização. A visualização da árvore de decisão é gerada usando objetos de gráficos do Plotly. A classe DecisionTree e classes relacionadas da implementação anterior são utilizadas para treinar a árvore de decisão e extrair as informações necessárias para a visualização.
 
