@@ -72,7 +72,7 @@ display_data = dbc.Row(
     [
         dcc.Markdown("""
             #### Data
-            Click on points in the graph.
+            Click on the nodes in the graph.
         """),
 
         dash_table.DataTable(id='data-table',

@@ -212,4 +212,5 @@ def update_data(click_data, data):
 
     subdata = node.data
     subdf = pd.DataFrame(subdata, columns=list(data[0].keys()))
+    
     return subdf.to_dict('records')
