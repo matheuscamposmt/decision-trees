@@ -6,7 +6,9 @@ from sklearn.datasets import load_iris, load_diabetes, load_wine
 from dt_algorithm import Node
 from dt_algorithm import DecisionTree
 
-datasets = {"iris": (load_iris, 'classification'), "diabetes": (load_diabetes, 'regression'), "wine": (load_wine, 'classification')}
+datasets = {"iris": (load_iris, 'classification'), 
+            "diabetes": (load_diabetes, 'regression'), 
+            "wine": (load_wine, 'classification')}
 
 def load_dataset(name: str, as_frame=False):
     return datasets[name][0](as_frame=as_frame), datasets[name][1]
