@@ -1,6 +1,6 @@
 # Árvores de Decisão do Zero usando Python e NumPy com visualização interativa
 
-![ezgif com-crop](https://github.com/matheuscamposmt/decision-trees/assets/69912320/424384d4-a243-48f4-91ec-07bb7c3786f8)
+![decision_tree_app](https://github.com/matheuscamposmt/decision-trees/assets/69912320/9084d374-1c62-4f84-b748-49712a6dfbfd)
 ---------------
 Este repositório contém uma implementação do algoritmo de Árvore de Decisão do zero usando o algoritmo CART (Árvores de Classificação e Regressão). A árvore de decisão é um algoritmo poderoso amplamente utilizado para construir modelos capazes de lidar tanto com tarefas de classificação quanto de regressão. Essa implementação é escrita em Python e utiliza a biblioteca NumPy para cálculos numéricos eficientes. Além disso possui um suporte para uma visualização de árvores de decisão de modo interativo para fins educacionais.
 
