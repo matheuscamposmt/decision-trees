@@ -72,8 +72,8 @@ display_data = dbc.Row(
     [
         dcc.Markdown("""
             #### Data
-            Click on the nodes in the graph.
-        """),
+            Click on the nodes in the graph to display its data.
+        """, id='data-markdown'),
 
         dash_table.DataTable(id='data-table',
                              style_cell={'textAlign': 'left'},

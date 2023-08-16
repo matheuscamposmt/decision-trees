@@ -95,28 +95,28 @@ class DecisionTree:
         
 
     def _grow(self, data, depth=1):
-        compute_cost = gini_impurity
+        compute_criterion_value = gini_impurity
         get_result = get_majority_class
         if self.tree_type == 'regression':
-            compute_cost = sse
+            compute_criterion_value = sse
             get_result = get_mean
 
         y = data[:, -1]
         # Calculate the criterion value of the data
-        cost_value = compute_cost(y)
+        criterion_value = compute_criterion_value(y)
         result = get_result(y)
 
         class_name = self.class_names[result] if self.tree_type=='classification' else f"{result:.4f}"
 
         # Stopping criteria
         if self.max_depth and depth >= self.max_depth:
-            return LeafNode(data, criterion_value=cost_value, 
+            return LeafNode(data, criterion_value=criterion_value, 
                             _result = result, class_name=class_name)
         if self.min_samples_to_split and (len(data) < self.min_samples_to_split):
-            return LeafNode(data, criterion_value=cost_value, 
+            return LeafNode(data, criterion_value=criterion_value, 
                             _result=result, class_name=class_name)
-        if cost_value < EPSILON:
-            return LeafNode(data, criterion_value=cost_value, 
+        if criterion_value < EPSILON:
+            return LeafNode(data, criterion_value=criterion_value, 
                             _result=result,class_name=class_name)
         
         feature_idxs = np.arange(data.shape[-1] - 1)
@@ -138,7 +138,7 @@ class DecisionTree:
                     selected_feature, 
                     min_feature_threshold, 
                     feature_name=self.feature_names[selected_feature] if any(self.feature_names) else "NA",
-                    criterion_value = cost_value,
+                    criterion_value = criterion_value,
                     _result=result, class_name=class_name)
     
     # DFS traversal
