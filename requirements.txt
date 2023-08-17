@@ -6,4 +6,3 @@ plotly==5.13.0
 python_igraph==0.10.6
 scikit_learn==1.3.0
 gunicorn==21.2.0
-```
