@@ -3,8 +3,8 @@ import pickle
 from typing import List
 import numpy as np
 from sklearn.datasets import load_iris, load_diabetes, load_wine
-from dt_algorithm import Node
-from dt_algorithm import DecisionTree
+from dt_algorithm.node import Node
+from dt_algorithm.tree import DecisionTree
 
 datasets = {"iris": (load_iris, 'classification'), 
             "diabetes": (load_diabetes, 'regression'), 
